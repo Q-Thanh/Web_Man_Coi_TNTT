@@ -15,12 +15,14 @@ export const authOptions: NextAuthOptions = {
         if (!credentials?.username || !credentials?.password) return null;
 
         const db = getDb();
+        const inputUser = credentials.username.toLowerCase().trim();
         const user = db.prepare(`
           SELECT u.*, t.name as team_name, t.color as team_color
           FROM users u
           LEFT JOIN teams t ON u.team_id = t.id
-          WHERE u.username = ?
-        `).get(credentials.username) as any;
+          WHERE lower(u.username) = ? 
+             OR replace(lower(u.username), '_', '') = replace(?, '_', '')
+        `).get(inputUser, inputUser) as any;
 
         if (!user) return null;
 

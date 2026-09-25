@@ -123,7 +123,7 @@ export default function LoginPage() {
           <p className={styles.demoTitle}>Tài khoản demo:</p>
           <div className={styles.demoList}>
             {[
-              { u: 'nguyenhoangan_gioakim', p: '123456', label: '👧 Thiếu nhi (Bao đồng 1A)' },
+              { u: 'gioakim_nguyenhoangan', p: '123456', label: '👧 Thiếu nhi (Bao đồng 1A)' },
               { u: 'giaoly1', p: 'gly123', label: '📚 Giáo lý viên' },
               { u: 'admin', p: 'admin123', label: '⚙️ Quản trị viên' },
             ].map(acc => (

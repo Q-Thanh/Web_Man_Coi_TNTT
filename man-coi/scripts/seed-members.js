@@ -127,7 +127,7 @@ async function run() {
       const parsed = parseMember(item);
       const cleanViet = removeVietnameseTones(parsed.vietnameseName);
       const cleanChristian = removeVietnameseTones(parsed.christianName);
-      const username = `${cleanViet}_${cleanChristian}`;
+      const username = `${cleanChristian}_${cleanViet}`;
 
       const res = insertUser.run(username, item, defaultPasswordHash, teamId);
       const newUserId = res.lastInsertRowid;

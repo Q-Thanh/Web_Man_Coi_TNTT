@@ -21,17 +21,21 @@ export default function DoiPage() {
       fetch('/api/leaderboard')
         .then(r => r.json())
         .then(d => {
-          const myTeam = d.teams.find((t: any) => t.name === session.user.teamName);
+          const myTeam = d.teams?.find((t: any) => 
+            (session.user.teamId && t.id === Number(session.user.teamId)) ||
+            (session.user.teamName && t.name === session.user.teamName)
+          );
           setTeamData(myTeam || null);
           setLoading(false);
-        });
+        })
+        .catch(() => setLoading(false));
     }
   }, [session]);
 
   const pageStyle = { minHeight: '100vh', background: 'linear-gradient(135deg, #EFF6FF, #F5F3FF)' };
   const mainStyle = { paddingTop: '80px', maxWidth: 800, margin: '0 auto', padding: '80px 24px 48px' };
 
-  if (!session?.user?.teamName) {
+  if (!session?.user?.teamId && !session?.user?.teamName) {
     return (
       <div style={pageStyle}>
         <Header />
@@ -96,33 +100,39 @@ export default function DoiPage() {
           <h2 style={{ fontSize: 18, fontWeight: 800, marginBottom: 20, color: '#1F2937' }}>
             🌟 Thành viên tiêu biểu
           </h2>
-          {teamData.topMembers?.map((member: any, i: number) => (
-            <div key={member.id} style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 14,
-              padding: '12px 0',
-              borderBottom: i < teamData.topMembers.length - 1 ? '1px solid #F3F4F6' : 'none',
-            }}>
-              <div style={{ width: 32, textAlign: 'center', fontSize: 18 }}>
-                {i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}
-              </div>
-              <div style={{
-                width: 40, height: 40, borderRadius: '50%',
-                background: `linear-gradient(135deg, ${teamColor}, ${teamColor}66)`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: 'white', fontWeight: 700, fontSize: 14, flexShrink: 0,
+          {(!teamData.topMembers || teamData.topMembers.length === 0) ? (
+            <p style={{ color: '#9CA3AF', textAlign: 'center', margin: '20px 0', fontSize: 14 }}>
+              Chưa có thành viên nào ghi nhận điểm. Hãy là người đầu tiên dâng hoa Mân Côi cho đội!
+            </p>
+          ) : (
+            teamData.topMembers.map((member: any, i: number) => (
+              <div key={member.id} style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 14,
+                padding: '12px 0',
+                borderBottom: i < teamData.topMembers.length - 1 ? '1px solid #F3F4F6' : 'none',
               }}>
-                {getAvatarInitials(member.display_name)}
+                <div style={{ width: 32, textAlign: 'center', fontSize: 18, fontWeight: 700, color: '#6B7280' }}>
+                  {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`}
+                </div>
+                <div style={{
+                  width: 40, height: 40, borderRadius: '50%',
+                  background: `linear-gradient(135deg, ${teamColor}, ${teamColor}66)`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: 'white', fontWeight: 700, fontSize: 14, flexShrink: 0,
+                }}>
+                  {getAvatarInitials(member.display_name)}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700, fontSize: 15 }}>{member.display_name}</div>
+                </div>
+                <div style={{ fontWeight: 800, fontSize: 16, color: teamColor }}>
+                  {formatPoints(member.personal_points ?? member.total_beads ?? 0)} ⭐
+                </div>
               </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 700, fontSize: 15 }}>{member.display_name}</div>
-              </div>
-              <div style={{ fontWeight: 800, fontSize: 16, color: teamColor }}>
-                {formatPoints(member.personal_points)} ⭐
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </main>
     </div>

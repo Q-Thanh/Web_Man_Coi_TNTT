@@ -16,18 +16,6 @@ export async function GET() {
     ORDER BY t.total_points DESC
   `).all() as any[];
 
-  // Get top members sorted by their total bead count
-  const topMembers = db.prepare(`
-    SELECT u.id, u.display_name, u.team_id, u.avatar_url,
-           u.personal_points as total_beads,
-           (SELECT COUNT(*) FROM rosary_beads WHERE user_id = u.id AND bead_type = 'small') as small_beads,
-           (SELECT COUNT(*) FROM rosary_beads WHERE user_id = u.id AND bead_type = 'large') as large_beads
-    FROM users u
-    WHERE u.role = 'CHILD'
-    ORDER BY u.personal_points DESC
-    LIMIT 20
-  `).all() as any[];
-
   // Get team streak info (avg of members)
   const teamStreaks = db.prepare(`
     SELECT u.team_id, AVG(s.current_streak) as avg_streak, MAX(s.current_streak) as max_streak
@@ -43,12 +31,26 @@ export async function GET() {
   // Community progress
   const community = db.prepare('SELECT * FROM community_progress LIMIT 1').get() as any;
 
-  const teamsWithRank = teams.map((team, index) => ({
-    ...team,
-    rank: index + 1,
-    topMembers: topMembers.filter(m => m.team_id === team.id).slice(0, 3),
-    streakInfo: streakMap[team.id] || { avg: 0, max: 0 },
-  }));
+  const teamsWithRank = teams.map((team, index) => {
+    const teamMembers = db.prepare(`
+      SELECT u.id, u.display_name, u.team_id, u.avatar_url,
+             u.personal_points,
+             u.personal_points as total_beads,
+             (SELECT COUNT(*) FROM rosary_beads WHERE user_id = u.id AND bead_type = 'small') as small_beads,
+             (SELECT COUNT(*) FROM rosary_beads WHERE user_id = u.id AND bead_type = 'large') as large_beads
+      FROM users u
+      WHERE u.team_id = ? AND u.role = 'CHILD'
+      ORDER BY u.personal_points DESC, u.display_name ASC
+      LIMIT 10
+    `).all(team.id) as any[];
+
+    return {
+      ...team,
+      rank: index + 1,
+      topMembers: teamMembers,
+      streakInfo: streakMap[team.id] || { avg: 0, max: 0 },
+    };
+  });
 
   return NextResponse.json({
     teams: teamsWithRank,

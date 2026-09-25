@@ -1,6 +1,7 @@
 // Utility functions for the Mân Côi application
 
-export function formatPoints(points: number): string {
+export function formatPoints(points?: number | null): string {
+  if (points === undefined || points === null || isNaN(points)) return '0';
   return points.toLocaleString('vi-VN');
 }
 

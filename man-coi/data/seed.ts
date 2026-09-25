@@ -7,12 +7,12 @@ async function seed() {
 
   // ─── TEAMS ───────────────────────────────────────────────────────────────
   const teams = [
-    { name: 'Thánh Gia', color: '#2563EB', description: 'Đội dưới sự bảo trợ của Gia đình Thánh' },
-    { name: 'Fatima', color: '#7C3AED', description: 'Đội mang tinh thần Đức Mẹ Fatima' },
-    { name: 'Lộ Đức', color: '#059669', description: 'Đội mang tinh thần Đức Mẹ Lộ Đức' },
-    { name: 'Guadalupe', color: '#D97706', description: 'Đội mang tinh thần Đức Mẹ Guadalupe' },
-    { name: 'Nazareth', color: '#DC2626', description: 'Đội mang tinh thần làng Nazareth' },
-    { name: 'Cana', color: '#0891B2', description: 'Đội mang tinh thần tiệc cưới Cana' },
+    { name: 'Bao đồng 1A', color: '#2563EB', description: 'Chi đoàn Bao đồng 1A' },
+    { name: 'Bao đồng 1B', color: '#059669', description: 'Chi đoàn Bao đồng 1B' },
+    { name: 'Bao đồng 1C', color: '#D97706', description: 'Chi đoàn Bao đồng 1C' },
+    { name: 'Bao đồng 2A', color: '#7C3AED', description: 'Chi đoàn Bao đồng 2A' },
+    { name: 'Bao đồng 2B', color: '#DC2626', description: 'Chi đoàn Bao đồng 2B' },
+    { name: 'Hiệp Sĩ', color: '#0891B2', description: 'Ngành Hiệp Sĩ' },
   ];
 
   const insertTeam = db.prepare(`

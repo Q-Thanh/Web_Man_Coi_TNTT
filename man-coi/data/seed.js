@@ -141,12 +141,12 @@ console.log('🌱 Bắt đầu tạo dữ liệu demo...');
 async function seed() {
   // Teams
   const teams = [
-    { name: 'Thánh Gia', color: '#2563EB', description: 'Đội dưới sự bảo trợ của Gia đình Thánh', total_points: 1250 },
-    { name: 'Fatima', color: '#7C3AED', description: 'Đội mang tinh thần Đức Mẹ Fatima', total_points: 1180 },
-    { name: 'Lộ Đức', color: '#059669', description: 'Đội mang tinh thần Đức Mẹ Lộ Đức', total_points: 950 },
-    { name: 'Guadalupe', color: '#D97706', description: 'Đội mang tinh thần Đức Mẹ Guadalupe', total_points: 870 },
-    { name: 'Nazareth', color: '#DC2626', description: 'Đội mang tinh thần làng Nazareth', total_points: 730 },
-    { name: 'Cana', color: '#0891B2', description: 'Đội mang tinh thần tiệc cưới Cana', total_points: 610 },
+    { name: 'Bao đồng 1A', color: '#2563EB', description: 'Chi đoàn Bao đồng 1A', total_points: 0 },
+    { name: 'Bao đồng 1B', color: '#059669', description: 'Chi đoàn Bao đồng 1B', total_points: 0 },
+    { name: 'Bao đồng 1C', color: '#D97706', description: 'Chi đoàn Bao đồng 1C', total_points: 0 },
+    { name: 'Bao đồng 2A', color: '#7C3AED', description: 'Chi đoàn Bao đồng 2A', total_points: 0 },
+    { name: 'Bao đồng 2B', color: '#DC2626', description: 'Chi đoàn Bao đồng 2B', total_points: 0 },
+    { name: 'Hiệp Sĩ', color: '#0891B2', description: 'Ngành Hiệp Sĩ', total_points: 0 },
   ];
 
   const insertTeam = db.prepare('INSERT OR IGNORE INTO teams (name, color, description, total_points) VALUES (@name, @color, @description, @total_points)');

@@ -141,12 +141,12 @@ export default function LandingPage() {
           <h2 className={styles.sectionTitle}>6 Đội Thi Đua</h2>
           <div className={styles.teamsGrid}>
             {[
-              { name: 'Thánh Gia', color: '#2563EB', icon: '👨‍👩‍👧' },
-              { name: 'Fatima', color: '#7C3AED', icon: '🌹' },
-              { name: 'Lộ Đức', color: '#059669', icon: '💧' },
-              { name: 'Guadalupe', color: '#D97706', icon: '🌺' },
-              { name: 'Nazareth', color: '#DC2626', icon: '⭐' },
-              { name: 'Cana', color: '#0891B2', icon: '🍷' },
+              { name: 'Bao đồng 1A', color: '#2563EB', icon: '🕊️' },
+              { name: 'Bao đồng 1B', color: '#059669', icon: '🌿' },
+              { name: 'Bao đồng 1C', color: '#D97706', icon: '☀️' },
+              { name: 'Bao đồng 2A', color: '#7C3AED', icon: '💜' },
+              { name: 'Bao đồng 2B', color: '#DC2626', icon: '🌹' },
+              { name: 'Hiệp Sĩ', color: '#0891B2', icon: '⚔️' },
             ].map(team => (
               <div key={team.name} className={styles.teamChip} style={{ borderColor: team.color }}>
                 <span>{team.icon}</span>

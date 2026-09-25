@@ -1,0 +1,276 @@
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(229, 231, 235, 0.8);
+  z-index: 500;
+  box-shadow: 0 1px 12px rgba(0, 0, 0, 0.06);
+}
+
+.headerInner {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 24px;
+  gap: 16px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Logo */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.logoIcon {
+  font-size: 28px;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+.logoText {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.logoTitle {
+  font-weight: 800;
+  font-size: 16px;
+  background: linear-gradient(135deg, #2563EB, #7C3AED);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.logoSub {
+  font-size: 10px;
+  color: #94A3B8;
+  font-weight: 500;
+}
+
+/* Nav */
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+  justify-content: center;
+}
+
+.navLink {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #4B5563;
+  transition: all 150ms ease;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.navLink:hover {
+  background: #EFF6FF;
+  color: #2563EB;
+}
+
+.navLinkActive {
+  background: #EFF6FF;
+  color: #2563EB;
+  font-weight: 700;
+}
+
+/* User area */
+.userArea {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.pointsBadge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background: linear-gradient(135deg, #FFFBEB, #FEF3C7);
+  border: 1px solid #FDE68A;
+  border-radius: 9999px;
+  font-size: 13px;
+}
+
+.pointsNum {
+  font-weight: 800;
+  color: #92400E;
+}
+
+/* Avatar */
+.avatarWrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  position: relative;
+  padding: 4px;
+  border-radius: 10px;
+  transition: background 150ms;
+}
+
+.avatarWrap:hover {
+  background: #F3F4F6;
+}
+
+.avatarPlaceholder {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  color: white;
+  flex-shrink: 0;
+}
+
+.dropIcon {
+  font-size: 11px;
+  color: #6B7280;
+}
+
+/* Dropdown */
+.dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+  border: 1px solid #E5E7EB;
+  overflow: hidden;
+  min-width: 200px;
+  z-index: 100;
+  animation: fadeInDown 0.2s ease;
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dropHeader {
+  padding: 14px 16px;
+  border-bottom: 1px solid #F3F4F6;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dropHeader strong {
+  font-size: 14px;
+  color: #111827;
+}
+
+.dropTeam {
+  font-size: 12px;
+  color: #6B7280;
+}
+
+.dropItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  font-size: 14px;
+  color: #374151;
+  transition: background 150ms;
+  cursor: pointer;
+  text-decoration: none;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+}
+
+.dropItem:hover {
+  background: #F3F4F6;
+}
+
+.dropItemDanger {
+  color: #DC2626;
+}
+
+.dropItemDanger:hover {
+  background: #FEF2F2;
+}
+
+/* Mobile menu button */
+.mobileMenuBtn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: #4B5563;
+  cursor: pointer;
+  padding: 4px;
+}
+
+/* Mobile nav */
+.mobileNav {
+  display: none;
+  flex-direction: column;
+  background: white;
+  border-top: 1px solid #E5E7EB;
+  padding: 12px;
+  gap: 4px;
+}
+
+.mobileNav a, .mobileNav button {
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 15px;
+  color: #374151;
+  text-decoration: none;
+  display: block;
+  transition: background 150ms;
+}
+
+.mobileNav a:hover {
+  background: #F3F4F6;
+}
+
+.mobileSignOut {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  color: #DC2626 !important;
+  width: 100%;
+  text-align: left;
+}
+
+@media (max-width: 900px) {
+  .nav { display: none; }
+  .mobileMenuBtn { display: block; }
+  .mobileNav { display: flex; }
+  .header { height: auto; position: fixed; }
+}
+
+@media (max-width: 480px) {
+  .headerInner { padding: 0 16px; }
+  .pointsBadge { display: none; }
+}

@@ -1,0 +1,46 @@
+.page { min-height: 100vh; background: linear-gradient(135deg, #FFFBEB, #FEF3C7 30%, #EFF6FF); }
+.main { padding-top: 80px; max-width: 800px; margin: 0 auto; padding: 80px 24px 48px; }
+.title { font-size: 32px; font-weight: 900; text-align: center; background: linear-gradient(135deg, #D97706, #7C3AED); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 8px; }
+.sub { text-align: center; color: #6B7280; margin-bottom: 28px; }
+
+.nextRewardCard { background: white; border-radius: 18px; padding: 24px; box-shadow: 0 4px 20px rgba(245,158,11,0.1); border: 1px solid #FDE68A; margin-bottom: 28px; }
+.nextRewardLabel { font-size: 14px; color: #374151; margin-bottom: 6px; }
+.nextRewardHint { font-size: 13px; color: #D97706; margin-bottom: 14px; }
+.nextRewardBar { position: relative; height: 12px; background: #F3F4F6; border-radius: 9999px; overflow: visible; }
+.nextRewardFill { height: 100%; border-radius: 9999px; background: linear-gradient(90deg, #F59E0B, #D97706); transition: width 1s ease; }
+.marker { position: absolute; top: -4px; width: 4px; height: 20px; background: #7C3AED; border-radius: 2px; transform: translateX(-50%); }
+
+.rewardsList { display: flex; flex-direction: column; gap: 14px; }
+
+.rewardCard {
+  background: white;
+  border-radius: 18px;
+  padding: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  border: 2px solid #F3F4F6;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  transition: all 200ms;
+  position: relative;
+}
+
+.rewardCard:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,0,0,0.09); }
+.rewardEarned { border-color: #FDE68A; background: linear-gradient(135deg, #FFFBEB, white 80%); }
+
+.rewardMilestone { font-size: 12px; font-weight: 700; color: #6B7280; white-space: nowrap; padding-top: 2px; min-width: 60px; text-align: center; }
+.rewardIcon { font-size: 36px; flex-shrink: 0; }
+
+.rewardContent { flex: 1; }
+.rewardName { font-size: 16px; font-weight: 700; color: #1F2937; margin-bottom: 4px; }
+.rewardDesc { font-size: 13px; color: #6B7280; margin-bottom: 8px; }
+.rewardType { display: inline-block; padding: 3px 10px; background: #F3F4F6; border-radius: 9999px; font-size: 11px; font-weight: 600; color: #374151; }
+.rewardTypeEarned { background: #D1FAE5; color: #065F46; }
+
+.rewardProgress { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.rewardTrack { flex: 1; height: 6px; background: #F3F4F6; border-radius: 9999px; overflow: hidden; }
+.rewardFill { height: 100%; border-radius: 9999px; background: linear-gradient(90deg, #F59E0B, #D97706); transition: width 0.8s ease; }
+.rewardPct { font-size: 12px; font-weight: 700; color: #374151; }
+
+.earnedDate { font-size: 12px; color: #9CA3AF; margin-top: 6px; }
+.earnedSeal { position: absolute; top: 16px; right: 16px; background: linear-gradient(135deg, #F59E0B, #D97706); color: white; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 700; }

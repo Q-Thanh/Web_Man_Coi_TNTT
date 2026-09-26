@@ -422,8 +422,8 @@
 }
 
 @media (max-width: 640px) {
-  .main { padding-left: 16px; padding-right: 16px; }
-  .rosarySection { padding: 20px; }
+  .main { padding-left: 10px; padding-right: 10px; }
+  .rosarySection { padding: 16px 8px; }
   .taskCard { flex-wrap: wrap; }
   .taskRight { flex-direction: row; width: 100%; justify-content: space-between; align-items: center; }
   .statsPanel { flex-direction: column; }

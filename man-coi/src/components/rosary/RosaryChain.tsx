@@ -42,13 +42,11 @@ interface BeadPos {
 }
 
 function calculateRosaryGeometry(width: number, height: number, mysteryInfo?: MysteryProgressInfo) {
-  // If canvas is wide (size lg: 860px), shift Rosary center to the left (cx = 285, rx = 205)
-  // so the Mystery Card has a completely clear, unobstructed space on the right (from x = 500px to 860px)
-  const isWide = width >= 700;
-  const cx = isWide ? 285 : width / 2;
-  const ovalCY = height * 0.38;
-  const rx = isWide ? 205 : width * 0.38;
-  const ry = isWide ? 235 : height * 0.30;
+  // Always center Rosary horizontally with generous radii to fill the screen
+  const cx = width / 2;
+  const ovalCY = height * 0.35;
+  const rx = width * 0.40;
+  const ry = height * 0.29;
 
   // Medallion at the bottom of the loop
   const medallionX = cx;
@@ -225,7 +223,6 @@ export default function RosaryChain({
   showLabels = true,
 }: RosaryChainProps) {
   const [selectedBead, setSelectedBead] = useState<BeadPos | null>(null);
-  const [showGuide, setShowGuide] = useState<boolean>(true);
   const [selectedDecadeNumber, setSelectedDecadeNumber] = useState<number | null>(null);
 
   // Compute mystery and decade progress from total small and large beads
@@ -245,12 +242,10 @@ export default function RosaryChain({
   const displayedDecade = mysteryInfo.mystery.decades[displayedDecadeNumber - 1];
   const isActiveDecade = displayedDecadeNumber === mysteryInfo.currentDecadeNumber;
 
-  // Responsive SVG canvas dimensions: width 860px gives the Mystery Card dedicated space on the right
+  // Optimized SVG canvas dimensions: 580x740 gives the centered Rosary full width on both mobile and desktop
   const dimensions = useMemo(() => {
-    if (size === 'sm') return { width: 440, height: 600 };
-    if (size === 'md') return { width: 560, height: 760 };
-    return { width: 860, height: 880 }; // lg
-  }, [size]);
+    return { width: 580, height: 740 };
+  }, []);
 
   const { width, height } = dimensions;
 
@@ -303,7 +298,7 @@ export default function RosaryChain({
 
   return (
     <div className={styles.rosaryWrapper}>
-      {/* Header controls & guide toggle */}
+      {/* Header controls */}
       <div className={styles.controlsBar}>
         <div className={styles.progressSummary}>
           <span className={styles.rosaryIconBadge}>{mysteryInfo.mystery.icon}</span>
@@ -316,113 +311,106 @@ export default function RosaryChain({
             </div>
           </div>
         </div>
-
-        <button
-          className={`${styles.guideToggleBtn} ${showGuide ? styles.guideActive : ''}`}
-          onClick={() => setShowGuide(v => !v)}
-          type="button"
-        >
-          {showGuide ? '👁️ Ẩn chú thích' : '📖 Hiện chú thích hướng dẫn'}
-        </button>
       </div>
 
-      {/* Main SVG Container */}
-      <div className={styles.svgContainer}>
-        {/* ─── THẺ MẦU NHIỆM & SUY NIỆM CHỤC KINH (GÓC PHẢI CHUỖI MÂN CÔI) ─── */}
-        <div className={styles.mysteryCardWrapper}>
-          <div className={styles.mysteryCard} style={{ borderColor: mysteryInfo.mystery.color }}>
-            {/* Header: Season & Round Badge */}
-            <div className={styles.mysteryCardHeader} style={{ background: mysteryInfo.mystery.bgGradient }}>
-              <div className={styles.mysterySeasonTag}>
-                <span className={styles.mysteryIcon}>{mysteryInfo.mystery.icon}</span>
-                <span className={styles.mysteryName}>{mysteryInfo.mystery.name}</span>
+      {/* ─── THẺ MẦU NHIỆM & SUY NIỆM CHỤC KINH (NẰM PHÍA TRÊN CHUỖI MÂN CÔI) ─── */}
+      <div className={styles.mysteryCardWrapper}>
+        <div className={styles.mysteryCard} style={{ borderColor: mysteryInfo.mystery.color }}>
+          {/* Header: Season & Round Badge */}
+          <div className={styles.mysteryCardHeader} style={{ background: mysteryInfo.mystery.bgGradient }}>
+            <div className={styles.mysterySeasonTag}>
+              <span className={styles.mysteryIcon}>{mysteryInfo.mystery.icon}</span>
+              <span className={styles.mysteryName}>{mysteryInfo.mystery.name}</span>
+            </div>
+            <span className={styles.mysteryRoundBadge} style={{ background: mysteryInfo.mystery.badgeBg }}>
+              Vòng {mysteryInfo.roundNumber}
+            </span>
+          </div>
+
+          {/* Body: Current Decade & Meditation */}
+          <div className={styles.mysteryBody}>
+            <div className={styles.mysteryDecadeTitleRow}>
+              <div className={styles.decadeBadge} style={{ color: mysteryInfo.mystery.color }}>
+                Chục {displayedDecade.title} (Hạt {(displayedDecadeNumber - 1) * 10 + 1} – {displayedDecadeNumber * 10})
               </div>
-              <span className={styles.mysteryRoundBadge} style={{ background: mysteryInfo.mystery.badgeBg }}>
-                Vòng {mysteryInfo.roundNumber}
-              </span>
+              {isActiveDecade ? (
+                <span className={styles.activePulseBadge}>Đang đọc</span>
+              ) : (
+                <button
+                  type="button"
+                  className={styles.backToActiveBtn}
+                  onClick={() => setSelectedDecadeNumber(null)}
+                  title="Quay lại chục đang đọc theo tiến độ chuỗi"
+                >
+                  ↩ Về chục đang đọc
+                </button>
+              )}
             </div>
 
-            {/* Body: Current Decade & Meditation */}
-            <div className={styles.mysteryBody}>
-              <div className={styles.mysteryDecadeTitleRow}>
-                <div className={styles.decadeBadge} style={{ color: mysteryInfo.mystery.color }}>
-                  Chục {displayedDecade.title} (Hạt {(displayedDecadeNumber - 1) * 10 + 1} – {displayedDecadeNumber * 10})
+            {/* Meditation Text from User */}
+            <div className={styles.meditationText}>
+              &ldquo;{displayedDecade.text}&rdquo;
+            </div>
+
+            {/* Decade Progress (if active) */}
+            {isActiveDecade && (
+              <div className={styles.decadeProgressWrap}>
+                <div className={styles.decadeProgressText}>
+                  <span>Tiến độ chục này:</span>
+                  <strong>{mysteryInfo.decadeProgress}/10 hạt nhỏ</strong>
                 </div>
-                {isActiveDecade ? (
-                  <span className={styles.activePulseBadge}>Đang đọc</span>
-                ) : (
-                  <button
-                    type="button"
-                    className={styles.backToActiveBtn}
-                    onClick={() => setSelectedDecadeNumber(null)}
-                    title="Quay lại chục đang đọc theo tiến độ chuỗi"
-                  >
-                    ↩ Về chục đang đọc
-                  </button>
+                <div className={styles.decadeProgressBar}>
+                  <div
+                    className={styles.decadeProgressFill}
+                    style={{
+                      width: `${(mysteryInfo.decadeProgress / 10) * 100}%`,
+                      backgroundColor: mysteryInfo.mystery.color,
+                    }}
+                  />
+                </div>
+                {mysteryInfo.decadeProgress === 10 && (
+                  <div className={styles.decadeCompleteNote}>
+                    ✨ Đã xong 10 hạt nhỏ! Đọc 1 Kinh Lạy Cha (Hạt to) để qua {mysteryInfo.currentDecadeNumber < 5 ? `Chục ${mysteryInfo.mystery.decades[mysteryInfo.currentDecadeNumber]?.title}` : 'Vòng Mầu Nhiệm mới'}!
+                  </div>
                 )}
               </div>
+            )}
 
-              {/* Meditation Text from User */}
-              <div className={styles.meditationText}>
-                &ldquo;{displayedDecade.text}&rdquo;
-              </div>
+            {/* 5 Decade Navigation Buttons */}
+            <div className={styles.decadeNavList}>
+              {mysteryInfo.mystery.decades.map((dec) => {
+                const isThisActive = dec.decadeNumber === mysteryInfo.currentDecadeNumber;
+                const isSelected = dec.decadeNumber === displayedDecadeNumber;
+                const isPassed = dec.decadeNumber < mysteryInfo.currentDecadeNumber;
 
-              {/* Decade Progress (if active) */}
-              {isActiveDecade && (
-                <div className={styles.decadeProgressWrap}>
-                  <div className={styles.decadeProgressText}>
-                    <span>Tiến độ chục này:</span>
-                    <strong>{mysteryInfo.decadeProgress}/10 hạt nhỏ</strong>
-                  </div>
-                  <div className={styles.decadeProgressBar}>
-                    <div
-                      className={styles.decadeProgressFill}
-                      style={{
-                        width: `${(mysteryInfo.decadeProgress / 10) * 100}%`,
-                        backgroundColor: mysteryInfo.mystery.color,
-                      }}
-                    />
-                  </div>
-                  {mysteryInfo.decadeProgress === 10 && (
-                    <div className={styles.decadeCompleteNote}>
-                      ✨ Đã xong 10 hạt nhỏ! Đọc 1 Kinh Lạy Cha (Hạt to) để qua {mysteryInfo.currentDecadeNumber < 5 ? `Chục ${mysteryInfo.mystery.decades[mysteryInfo.currentDecadeNumber]?.title}` : 'Vòng Mầu Nhiệm mới'}!
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* 5 Decade Navigation Buttons */}
-              <div className={styles.decadeNavList}>
-                {mysteryInfo.mystery.decades.map((dec) => {
-                  const isThisActive = dec.decadeNumber === mysteryInfo.currentDecadeNumber;
-                  const isSelected = dec.decadeNumber === displayedDecadeNumber;
-                  const isPassed = dec.decadeNumber < mysteryInfo.currentDecadeNumber;
-
-                  return (
-                    <button
-                      key={dec.decadeNumber}
-                      type="button"
-                      className={`${styles.decadeNavBtn} ${isSelected ? styles.decadeNavBtnSelected : ''} ${isThisActive ? styles.decadeNavBtnActive : ''}`}
-                      onClick={() => {
-                        if (dec.decadeNumber === displayedDecadeNumber) {
-                          setSelectedDecadeNumber(null);
-                        } else {
-                          setSelectedDecadeNumber(dec.decadeNumber);
-                        }
-                      }}
-                      title={dec.text}
-                    >
-                      <span>{dec.decadeNumber}</span>
-                      {isPassed && <span className={styles.checkDone}>✓</span>}
-                    </button>
-                  );
-                })}
-              </div>
+                return (
+                  <button
+                    key={dec.decadeNumber}
+                    type="button"
+                    className={`${styles.decadeNavBtn} ${isSelected ? styles.decadeNavBtnSelected : ''} ${isThisActive ? styles.decadeNavBtnActive : ''}`}
+                    onClick={() => {
+                      if (dec.decadeNumber === displayedDecadeNumber) {
+                        setSelectedDecadeNumber(null);
+                      } else {
+                        setSelectedDecadeNumber(dec.decadeNumber);
+                      }
+                    }}
+                    title={dec.text}
+                  >
+                    <span>{dec.decadeNumber}</span>
+                    {isPassed && <span className={styles.checkDone}>✓</span>}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Main SVG Container: Chuỗi Mân Côi nằm phía dưới, phóng to trọn vẹn */}
+      <div className={styles.svgContainer}>
         <svg
-          viewBox={`0 0 ${width} ${height + 60}`}
+          viewBox={`0 0 ${width} ${height}`}
           width="100%"
           height="100%"
           className={styles.rosarySvg}
@@ -799,52 +787,6 @@ export default function RosaryChain({
 
             <title>Cây Thánh Giá: Dấu Thánh Giá & Kinh Tin Kính</title>
           </g>
-
-          {/* ─── 5. CALLOUT GUIDANCE BOXES (NHƯ TRONG HÌNH ẢNH MẪU) ─── */}
-          {showGuide && (
-            <g className={styles.calloutGuides}>
-              {/* Callout 1: Cây Thánh Giá */}
-              <g transform={`translate(${geo.crossX - 180}, ${geo.crossY + 15})`}>
-                <rect width="140" height="38" rx="8" fill="#FFFFFF" stroke="#0284C7" strokeWidth="1.5" filter="drop-shadow(0 2px 6px rgba(0,0,0,0.1))" />
-                <path d={`M 140, 19 L 165, ${geo.crossY + 28 - (geo.crossY + 15)}`} stroke="#0284C7" strokeWidth="1.2" strokeDasharray="3 2" />
-                <text x="8" y="16" fontSize="10" fontWeight="bold" fill="#0369A1">1. Cây Thánh Giá</text>
-                <text x="8" y="28" fontSize="8.5" fill="#475569">Dấu Thánh Giá & Tin Kính</text>
-              </g>
-
-              {/* Callout 2: Hạt lớn đầu tiên */}
-              <g transform={`translate(${geo.cx + 40}, ${geo.crossY - 35})`}>
-                <rect width="140" height="38" rx="8" fill="#FFFFFF" stroke="#0284C7" strokeWidth="1.5" filter="drop-shadow(0 2px 6px rgba(0,0,0,0.1))" />
-                <path d={`M 0, 19 L -25, 19`} stroke="#0284C7" strokeWidth="1.2" strokeDasharray="3 2" />
-                <text x="8" y="16" fontSize="10" fontWeight="bold" fill="#0369A1">2. Hạt lớn đầu tiên</text>
-                <text x="8" y="28" fontSize="8.5" fill="#475569">Kinh Lạy Cha (Đức GH)</text>
-              </g>
-
-              {/* Callout 3: 3 hạt nhỏ */}
-              <g transform={`translate(${geo.cx + 45}, ${geo.crossY - 95})`}>
-                <rect width="140" height="38" rx="8" fill="#FFFFFF" stroke="#0284C7" strokeWidth="1.5" filter="drop-shadow(0 2px 6px rgba(0,0,0,0.1))" />
-                <path d={`M 0, 19 L -30, 19`} stroke="#0284C7" strokeWidth="1.2" strokeDasharray="3 2" />
-                <text x="8" y="16" fontSize="10" fontWeight="bold" fill="#0369A1">3. Ba hạt nhỏ</text>
-                <text x="8" y="28" fontSize="8.5" fill="#475569">3 Kính Mừng (Tin-Cậy-Mến)</text>
-              </g>
-
-              {/* Callout 4: Hạt lớn sau 3 hạt nhỏ */}
-              <g transform={`translate(${geo.cx + 45}, ${geo.medallionY + 20})`}>
-                <rect width="140" height="38" rx="8" fill="#FFFFFF" stroke="#0284C7" strokeWidth="1.5" filter="drop-shadow(0 2px 6px rgba(0,0,0,0.1))" />
-                <path d={`M 0, 19 L -30, 9`} stroke="#0284C7" strokeWidth="1.2" strokeDasharray="3 2" />
-                <text x="8" y="16" fontSize="10" fontWeight="bold" fill="#0369A1">4. Hạt lớn kế tiếp</text>
-                <text x="8" y="28" fontSize="8.5" fill="#475569">Kinh Sáng Danh & Lời Fatima</text>
-              </g>
-
-              {/* Callout 5: Mề Đay & 5 Chục Kinh */}
-              <g transform={`translate(${geo.medallionX - 195}, ${geo.medallionY - 30})`}>
-                <rect width="155" height="50" rx="8" fill="#FFFBEB" stroke="#D97706" strokeWidth="1.5" filter="drop-shadow(0 2px 6px rgba(0,0,0,0.1))" />
-                <path d={`M 155, 25 L 180, 25`} stroke="#D97706" strokeWidth="1.2" strokeDasharray="3 2" />
-                <text x="8" y="16" fontSize="10" fontWeight="bold" fill="#92400E">5. Mề Đay & 5 Chục Kinh</text>
-                <text x="8" y="28" fontSize="8.5" fill="#78350F">Ngắm Mầu Nhiệm & 5 Chục</text>
-                <text x="8" y="40" fontSize="8" fill="#92400E">1 Lạy Cha + 10 Kính Mừng + Sáng Danh</text>
-              </g>
-            </g>
-          )}
         </svg>
       </div>
 

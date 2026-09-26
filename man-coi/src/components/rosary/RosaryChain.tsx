@@ -44,13 +44,13 @@ interface BeadPos {
 function calculateRosaryGeometry(width: number, height: number, mysteryInfo?: MysteryProgressInfo) {
   // Center Rosary horizontally with an elegant, tall vertical oval shape (elip đứng theo hình mẫu)
   const cx = width / 2;
-  const ovalCY = height * 0.385;
+  const ovalCY = height * 0.36; // 274px
   const rx = width * 0.36; // 180px on 500px width (thon gọn chiều ngang)
-  const ry = height * 0.335; // 255px on 760px height (thon dài chiều dọc)
+  const ry = height * 0.315; // 240px on 760px height (dáng elip đứng, chừa chỗ cho chuỗi dọc)
 
   // Medallion at the bottom of the loop
   const medallionX = cx;
-  const medallionY = ovalCY + ry;
+  const medallionY = ovalCY + ry; // 514px
 
   // The 5 decades around the ellipse
   // Gap at bottom for the medallion: angle gap of ~0.26 radians each side
@@ -127,9 +127,6 @@ function calculateRosaryGeometry(width: number, height: number, mysteryInfo?: My
   // 4. Large bead 2 (Hạt lớn trước Mề Đay: pos 56)
   // 5. Medallion (Mề Đay Đức Mẹ: pos 57)
 
-  const pendantTopY = medallionY + 24;
-  const pendantSpacing = 22;
-
   const pendantBeads: BeadPos[] = [
     // Medallion
     {
@@ -148,7 +145,7 @@ function calculateRosaryGeometry(width: number, height: number, mysteryInfo?: My
       position: 56,
       type: 'large',
       x: cx,
-      y: pendantTopY,
+      y: medallionY + 38,
       name: 'Hạt lớn trước Mề Đay',
       prayer: 'Kinh Sáng Danh & Lời nguyện Fatima',
       meaning: 'Sáng danh Đức Chúa Cha... và Lời nguyện Fatima',
@@ -159,7 +156,7 @@ function calculateRosaryGeometry(width: number, height: number, mysteryInfo?: My
       position: 103,
       type: 'small',
       x: cx,
-      y: pendantTopY + pendantSpacing * 0.95,
+      y: medallionY + 70,
       name: 'Hạt nhỏ thứ 3',
       prayer: 'Kinh Kính Mừng (Ơn Đức Mến)',
       meaning: 'Kính Mừng Maria - Cầu xin ơn Đức Mến vẹn toàn',
@@ -169,7 +166,7 @@ function calculateRosaryGeometry(width: number, height: number, mysteryInfo?: My
       position: 102,
       type: 'small',
       x: cx,
-      y: pendantTopY + pendantSpacing * 1.85,
+      y: medallionY + 94,
       name: 'Hạt nhỏ thứ 2',
       prayer: 'Kinh Kính Mừng (Ơn Đức Cậy)',
       meaning: 'Kính Mừng Maria - Cầu xin ơn Đức Cậy vững vàng',
@@ -179,7 +176,7 @@ function calculateRosaryGeometry(width: number, height: number, mysteryInfo?: My
       position: 101,
       type: 'small',
       x: cx,
-      y: pendantTopY + pendantSpacing * 2.75,
+      y: medallionY + 118,
       name: 'Hạt nhỏ thứ 1',
       prayer: 'Kinh Kính Mừng (Ơn Đức Tin)',
       meaning: 'Kính Mừng Maria - Cầu xin ơn Đức Tin sâu sắc',
@@ -190,14 +187,14 @@ function calculateRosaryGeometry(width: number, height: number, mysteryInfo?: My
       position: 51,
       type: 'large',
       x: cx,
-      y: pendantTopY + pendantSpacing * 3.75,
+      y: medallionY + 152,
       name: 'Hạt lớn đầu tiên',
       prayer: 'Kinh Lạy Cha',
       meaning: 'Cầu theo ý chỉ của Đức Giáo Hoàng',
     },
   ];
 
-  const crossY = pendantTopY + pendantSpacing * 4.8;
+  const crossY = medallionY + 186;
 
   return {
     cx,
@@ -536,21 +533,22 @@ export default function RosaryChain({
           <path
             d={chainPathLoop}
             fill="none"
-            stroke="url(#goldChainGrad)"
-            strokeWidth="2.2"
+            stroke="#B45309"
+            strokeWidth="2.4"
             strokeLinecap="round"
             strokeLinejoin="round"
             className={styles.rosaryChainLine}
           />
 
-          {/* Pendant Chain */}
-          <path
-            d={chainPathPendant}
-            fill="none"
-            stroke="url(#goldChainGrad)"
-            strokeWidth="2.5"
+          {/* Pendant Chain Wire: Solid visible bronze-amber wire, works on all devices & Safari */}
+          <line
+            x1={geo.cx}
+            y1={geo.medallionY}
+            x2={geo.cx}
+            y2={geo.crossY}
+            stroke="#B45309"
+            strokeWidth="2.8"
             strokeLinecap="round"
-            strokeLinejoin="round"
             className={styles.rosaryChainLine}
           />
 
@@ -619,11 +617,7 @@ export default function RosaryChain({
             const isMedallion = bead.type === 'medallion';
             let isLit = false;
             if (isMedallion) {
-              isLit = litSmallCount >= 50 && litLargeCount >= 5;
-            } else if (bead.type === 'small') {
-              if (bead.position === 101) isLit = litSmallCount >= 1;
-              else if (bead.position === 102) isLit = litSmallCount >= 2;
-              else if (bead.position === 103) isLit = litSmallCount >= 3;
+              isLit = (litSmallCount >= 50 && litLargeCount >= 5) || litMap.has(bead.position);
             } else {
               isLit = litMap.has(bead.position);
             }

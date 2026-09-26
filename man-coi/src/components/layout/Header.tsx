@@ -3,19 +3,39 @@
 import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getAvatarInitials } from '@/lib/utils';
 import styles from './Header.module.css';
 
 export default function Header() {
   const { data: session } = useSession();
   const pathname = usePathname();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [avatarDropdownOpen, setAvatarDropdownOpen] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+
+  // Close menus when route changes
+  useEffect(() => {
+    setAvatarDropdownOpen(false);
+    setMobileNavOpen(false);
+  }, [pathname]);
+
+  // Click outside to close menus
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (headerRef.current && !headerRef.current.contains(event.target as Node)) {
+        setAvatarDropdownOpen(false);
+        setMobileNavOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   if (!session) return null;
 
   return (
-    <header className={styles.header}>
+    <header className={styles.header} ref={headerRef}>
       <div className={styles.headerInner}>
         {/* Logo */}
         <Link href="/dashboard" className={styles.logo}>
@@ -38,7 +58,7 @@ export default function Header() {
           )}
         </nav>
 
-        {/* User menu */}
+        {/* User area */}
         <div className={styles.userArea}>
           {/* Points badge */}
           <div className={styles.pointsBadge}>
@@ -47,7 +67,13 @@ export default function Header() {
           </div>
 
           {/* Avatar dropdown */}
-          <div className={styles.avatarWrap} onClick={() => setMenuOpen(v => !v)}>
+          <div
+            className={styles.avatarWrap}
+            onClick={() => {
+              setAvatarDropdownOpen(v => !v);
+              setMobileNavOpen(false);
+            }}
+          >
             <div
               className={styles.avatarPlaceholder}
               style={{
@@ -60,13 +86,13 @@ export default function Header() {
             </div>
             <span className={styles.dropIcon}>▾</span>
 
-            {menuOpen && (
-              <div className={styles.dropdown}>
+            {avatarDropdownOpen && (
+              <div className={styles.dropdown} onClick={(e) => e.stopPropagation()}>
                 <div className={styles.dropHeader}>
                   <strong>{session.user.name}</strong>
                   <span className={styles.dropTeam}>{session.user.teamName || 'Chưa có đội'}</span>
                 </div>
-                <Link href="/ho-so" className={styles.dropItem} onClick={() => setMenuOpen(false)}>
+                <Link href="/ho-so" className={styles.dropItem} onClick={() => setAvatarDropdownOpen(false)}>
                   👤 Hồ sơ cá nhân
                 </Link>
                 <button
@@ -80,21 +106,31 @@ export default function Header() {
           </div>
 
           {/* Mobile menu button */}
-          <button className={styles.mobileMenuBtn} onClick={() => setMenuOpen(v => !v)}>
-            ☰
+          <button
+            className={styles.mobileMenuBtn}
+            aria-label="Menu"
+            onClick={() => {
+              setMobileNavOpen(v => !v);
+              setAvatarDropdownOpen(false);
+            }}
+          >
+            {mobileNavOpen ? '✕' : '☰'}
           </button>
         </div>
       </div>
 
       {/* Mobile nav */}
-      {menuOpen && (
+      {mobileNavOpen && (
         <div className={styles.mobileNav}>
-          <Link href="/dashboard" onClick={() => setMenuOpen(false)}>🏠 Trang chủ</Link>
-          <Link href="/thi-dua" onClick={() => setMenuOpen(false)}>🏆 Thi đua</Link>
-          <Link href="/doi" onClick={() => setMenuOpen(false)}>👥 Đội của con</Link>
-          <Link href="/huy-hieu" onClick={() => setMenuOpen(false)}>🏅 Huy hiệu</Link>
-          <Link href="/phan-thuong" onClick={() => setMenuOpen(false)}>🎁 Phần thưởng</Link>
-          <Link href="/ho-so" onClick={() => setMenuOpen(false)}>👤 Hồ sơ</Link>
+          <Link href="/dashboard" onClick={() => setMobileNavOpen(false)}>🏠 Trang chủ</Link>
+          <Link href="/thi-dua" onClick={() => setMobileNavOpen(false)}>🏆 Thi đua</Link>
+          <Link href="/doi" onClick={() => setMobileNavOpen(false)}>👥 Đội của con</Link>
+          <Link href="/huy-hieu" onClick={() => setMobileNavOpen(false)}>🏅 Huy hiệu</Link>
+          <Link href="/phan-thuong" onClick={() => setMobileNavOpen(false)}>🎁 Phần thưởng</Link>
+          {(session.user.role === 'ADMIN' || session.user.role === 'LEADER') && (
+            <Link href="/admin" onClick={() => setMobileNavOpen(false)}>⚙️ Quản lý</Link>
+          )}
+          <Link href="/ho-so" onClick={() => setMobileNavOpen(false)}>👤 Hồ sơ</Link>
           <button className={styles.mobileSignOut} onClick={() => signOut({ callbackUrl: '/' })}>
             🚪 Đăng xuất
           </button>

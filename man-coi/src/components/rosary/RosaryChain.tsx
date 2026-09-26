@@ -42,11 +42,11 @@ interface BeadPos {
 }
 
 function calculateRosaryGeometry(width: number, height: number, mysteryInfo?: MysteryProgressInfo) {
-  // Always center Rosary horizontally with generous radii to fill the screen
+  // Center Rosary horizontally with an elegant, tall vertical oval shape (elip đứng theo hình mẫu)
   const cx = width / 2;
-  const ovalCY = height * 0.35;
-  const rx = width * 0.40;
-  const ry = height * 0.29;
+  const ovalCY = height * 0.385;
+  const rx = width * 0.36; // 180px on 500px width (thon gọn chiều ngang)
+  const ry = height * 0.335; // 255px on 760px height (thon dài chiều dọc)
 
   // Medallion at the bottom of the loop
   const medallionX = cx;
@@ -127,8 +127,8 @@ function calculateRosaryGeometry(width: number, height: number, mysteryInfo?: My
   // 4. Large bead 2 (Hạt lớn trước Mề Đay: pos 56)
   // 5. Medallion (Mề Đay Đức Mẹ: pos 57)
 
-  const pendantTopY = medallionY + 28;
-  const pendantSpacing = 28;
+  const pendantTopY = medallionY + 24;
+  const pendantSpacing = 22;
 
   const pendantBeads: BeadPos[] = [
     // Medallion
@@ -159,7 +159,7 @@ function calculateRosaryGeometry(width: number, height: number, mysteryInfo?: My
       position: 103,
       type: 'small',
       x: cx,
-      y: pendantTopY + pendantSpacing * 1,
+      y: pendantTopY + pendantSpacing * 0.95,
       name: 'Hạt nhỏ thứ 3',
       prayer: 'Kinh Kính Mừng (Ơn Đức Mến)',
       meaning: 'Kính Mừng Maria - Cầu xin ơn Đức Mến vẹn toàn',
@@ -169,7 +169,7 @@ function calculateRosaryGeometry(width: number, height: number, mysteryInfo?: My
       position: 102,
       type: 'small',
       x: cx,
-      y: pendantTopY + pendantSpacing * 1.9,
+      y: pendantTopY + pendantSpacing * 1.85,
       name: 'Hạt nhỏ thứ 2',
       prayer: 'Kinh Kính Mừng (Ơn Đức Cậy)',
       meaning: 'Kính Mừng Maria - Cầu xin ơn Đức Cậy vững vàng',
@@ -179,7 +179,7 @@ function calculateRosaryGeometry(width: number, height: number, mysteryInfo?: My
       position: 101,
       type: 'small',
       x: cx,
-      y: pendantTopY + pendantSpacing * 2.8,
+      y: pendantTopY + pendantSpacing * 2.75,
       name: 'Hạt nhỏ thứ 1',
       prayer: 'Kinh Kính Mừng (Ơn Đức Tin)',
       meaning: 'Kính Mừng Maria - Cầu xin ơn Đức Tin sâu sắc',
@@ -190,7 +190,7 @@ function calculateRosaryGeometry(width: number, height: number, mysteryInfo?: My
       position: 51,
       type: 'large',
       x: cx,
-      y: pendantTopY + pendantSpacing * 3.8,
+      y: pendantTopY + pendantSpacing * 3.75,
       name: 'Hạt lớn đầu tiên',
       prayer: 'Kinh Lạy Cha',
       meaning: 'Cầu theo ý chỉ của Đức Giáo Hoàng',
@@ -242,9 +242,9 @@ export default function RosaryChain({
   const displayedDecade = mysteryInfo.mystery.decades[displayedDecadeNumber - 1];
   const isActiveDecade = displayedDecadeNumber === mysteryInfo.currentDecadeNumber;
 
-  // Optimized SVG canvas dimensions: 580x740 gives the centered Rosary full width on both mobile and desktop
+  // Optimized SVG canvas dimensions: 500x760 gives a tall vertical oval proportion
   const dimensions = useMemo(() => {
-    return { width: 580, height: 740 };
+    return { width: 500, height: 760 };
   }, []);
 
   const { width, height } = dimensions;
@@ -511,10 +511,10 @@ export default function RosaryChain({
           <g clipPath="url(#maryOvalClip)">
             <image
               href="/images/duc-me.jpg"
-              x={geo.cx - geo.rx * 0.82}
-              y={geo.ovalCY - geo.ry * 0.92}
-              width={geo.rx * 1.64}
-              height={geo.ry * 1.84}
+              x={geo.cx - geo.rx * 0.78}
+              y={geo.ovalCY - geo.ry * 0.88}
+              width={geo.rx * 1.56}
+              height={geo.ry * 1.76}
               preserveAspectRatio="xMidYMid slice"
               className={styles.maryImage}
             />

@@ -14,6 +14,38 @@ export default function AdminPage() {
   const [users, setUsers] = useState<any[]>([]);
   const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [resetting, setResetting] = useState(false);
+
+  const handleResetAllBeads = async () => {
+    if (!window.confirm('⚠️ CẢNH BÁO: Bạn có chắc chắn muốn xóa TOÀN BỘ hạt mân côi đã sáng và đưa điểm số của tất cả các em về 0 để chuẩn bị thi đua chính thức không?')) {
+      return;
+    }
+    setResetting(true);
+    try {
+      const res = await fetch('/api/admin/reset-beads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert(data.message || 'Đã reset toàn bộ hạt về 0 thành công!');
+        const [s, u, t] = await Promise.all([
+          fetch('/api/admin/stats').then(r => r.json()),
+          fetch('/api/admin/users').then(r => r.json()),
+          fetch('/api/admin/tasks').then(r => r.json()),
+        ]);
+        setStats(s);
+        setUsers(u.users || []);
+        setTasks(t.tasks || []);
+      } else {
+        alert(data.error || 'Có lỗi xảy ra khi xóa dữ liệu');
+      }
+    } catch (err: any) {
+      alert('Lỗi kết nối: ' + err.message);
+    } finally {
+      setResetting(false);
+    }
+  };
 
   useEffect(() => {
     if (status === 'unauthenticated') { router.push('/login'); return; }
@@ -148,6 +180,39 @@ export default function AdminPage() {
                   </span>
                 </div>
               ))}
+            </div>
+
+            {/* Danger / Reset Tools */}
+            <div style={{ background: '#FFF1F2', border: '1.5px solid #FECDD3', borderRadius: 18, padding: 24, boxShadow: '0 2px 12px rgba(225, 29, 72, 0.06)', marginTop: 24 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+                <div>
+                  <h2 style={{ fontSize: 16, fontWeight: 800, color: '#9F1239', margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    ⚠️ Quản lý dữ liệu thử nghiệm
+                  </h2>
+                  <p style={{ color: '#BE123C', fontSize: 13, margin: '4px 0 0 0' }}>
+                    Dành cho Ban Quản trị: Xóa toàn bộ hạt đã sáng & điểm số thử nghiệm để chuẩn bị bước vào thi đua chính thức.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  disabled={resetting}
+                  onClick={handleResetAllBeads}
+                  style={{
+                    padding: '10px 20px',
+                    borderRadius: 10,
+                    background: '#E11D48',
+                    color: 'white',
+                    border: 'none',
+                    fontWeight: 700,
+                    fontSize: 14,
+                    cursor: resetting ? 'not-allowed' : 'pointer',
+                    boxShadow: '0 4px 12px rgba(225, 29, 72, 0.3)',
+                    fontFamily: 'inherit',
+                  }}
+                >
+                  {resetting ? '⏳ Đang xóa...' : '🔄 Xóa toàn bộ hạt test (Về 0)'}
+                </button>
+              </div>
             </div>
           </div>
         )}

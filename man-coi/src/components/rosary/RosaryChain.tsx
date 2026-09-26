@@ -349,6 +349,12 @@ export default function RosaryChain({
               &ldquo;{displayedDecade.text}&rdquo;
             </div>
 
+            {/* Lời nguyện Fatima dưới mỗi chục */}
+            <div className={styles.fatimaPrayerText}>
+              <span className={styles.fatimaTag}>✝ Lời nguyện Fatima:</span>
+              &ldquo;Lạy Chúa Giêsu, xin tha tội cho chúng con, xin cứu chúng con khỏi sa hỏa ngục, xin đưa các linh hồn lên thiên đàng, nhất là những linh hồn cần đến lòng Chúa thương xót hơn. Amen.&rdquo;
+            </div>
+
             {/* Decade Progress (if active) */}
             {isActiveDecade && (
               <div className={styles.decadeProgressWrap}>

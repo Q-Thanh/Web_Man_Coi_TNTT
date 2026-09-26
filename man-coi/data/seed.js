@@ -212,9 +212,6 @@ async function seed() {
     // bead_progress = số kinh = số hạt to được thắp sáng
     { title: '1 Kinh Lạy Cha',  description: 'Đọc 1 lần Kinh Lạy Cha với tâm hồn khiêm tốn', bead_progress: 1,  bead_type: 'large', task_type: 'daily',   icon: '🙏' },
     { title: '5 Kinh Lạy Cha',  description: 'Đọc 5 lần Kinh Lạy Cha', bead_progress: 5,  bead_type: 'large', task_type: 'daily',   icon: '🙏' },
-    { title: '10 Kinh Lạy Cha', description: 'Đọc 10 lần Kinh Lạy Cha', bead_progress: 10, bead_type: 'large', task_type: 'special', icon: '🙏' },
-    { title: '15 Kinh Lạy Cha', description: 'Đọc 15 lần Kinh Lạy Cha', bead_progress: 15, bead_type: 'large', task_type: 'special', icon: '🙏' },
-    { title: '20 Kinh Lạy Cha', description: 'Đọc 20 lần Kinh Lạy Cha – dâng lên Thiên Chúa', bead_progress: 20, bead_type: 'large', task_type: 'special', icon: '🙏' },
   ];
 
   // Thêm cột bead_type nếu chưa có (migrate schema)

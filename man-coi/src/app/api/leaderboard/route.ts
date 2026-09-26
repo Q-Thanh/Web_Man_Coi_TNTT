@@ -1,11 +1,9 @@
 import { NextResponse } from 'next/server';
-import getDb from '@/lib/db';
+import db from '@/lib/db';
 
 export async function GET() {
-  const db = getDb();
-
   // Get all teams sorted by bead count (total_points repurposed as bead count)
-  const teams = db.prepare(`
+  const teams = await db.all(`
     SELECT t.*,
            COUNT(u.id) as member_count,
            COALESCE(SUM(CASE WHEN date(tc.completed_at) = date('now') THEN tc.beads_earned ELSE 0 END), 0) as today_beads
@@ -14,25 +12,25 @@ export async function GET() {
     LEFT JOIN task_completions tc ON tc.user_id = u.id
     GROUP BY t.id
     ORDER BY t.total_points DESC
-  `).all() as any[];
+  `) as any[];
 
   // Get team streak info (avg of members)
-  const teamStreaks = db.prepare(`
+  const teamStreaks = await db.all(`
     SELECT u.team_id, AVG(s.current_streak) as avg_streak, MAX(s.current_streak) as max_streak
     FROM streaks s
     JOIN users u ON s.user_id = u.id
     GROUP BY u.team_id
-  `).all() as any[];
+  `) as any[];
 
   const streakMap = Object.fromEntries(
     teamStreaks.map(ts => [ts.team_id, { avg: ts.avg_streak, max: ts.max_streak }])
   );
 
   // Community progress
-  const community = db.prepare('SELECT * FROM community_progress LIMIT 1').get() as any;
+  const community = await db.get('SELECT * FROM community_progress LIMIT 1') as any;
 
-  const teamsWithRank = teams.map((team, index) => {
-    const teamMembers = db.prepare(`
+  const teamsWithRank = await Promise.all(teams.map(async (team, index) => {
+    const teamMembers = await db.all(`
       SELECT u.id, u.display_name, u.team_id, u.avatar_url,
              u.personal_points,
              u.personal_points as total_beads,
@@ -42,7 +40,7 @@ export async function GET() {
       WHERE u.team_id = ? AND u.role = 'CHILD'
       ORDER BY u.personal_points DESC, u.display_name ASC
       LIMIT 10
-    `).all(team.id) as any[];
+    `, team.id) as any[];
 
     return {
       ...team,
@@ -50,7 +48,7 @@ export async function GET() {
       topMembers: teamMembers,
       streakInfo: streakMap[team.id] || { avg: 0, max: 0 },
     };
-  });
+  }));
 
   return NextResponse.json({
     teams: teamsWithRank,

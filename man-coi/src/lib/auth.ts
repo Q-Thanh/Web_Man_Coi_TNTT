@@ -1,7 +1,7 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
-import getDb from './db';
+import db from './db';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -14,15 +14,14 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         if (!credentials?.username || !credentials?.password) return null;
 
-        const db = getDb();
         const inputUser = credentials.username.toLowerCase().trim();
-        const user = db.prepare(`
+        const user = await db.get(`
           SELECT u.*, t.name as team_name, t.color as team_color
           FROM users u
           LEFT JOIN teams t ON u.team_id = t.id
           WHERE lower(u.username) = ? 
              OR replace(lower(u.username), '_', '') = replace(?, '_', '')
-        `).get(inputUser, inputUser) as any;
+        `, inputUser, inputUser) as any;
 
         if (!user) return null;
 

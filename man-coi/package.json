@@ -10,6 +10,7 @@
     "seed": "npx ts-node --skip-project data/seed.ts"
   },
   "dependencies": {
+    "@libsql/client": "^0.18.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/better-sqlite3": "^9.6.0",
     "bcryptjs": "^3.0.3",

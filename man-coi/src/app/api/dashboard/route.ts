@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import getDb from '@/lib/db';
+import db from '@/lib/db';
 import { getMysteryProgress } from '@/lib/rosaryMysteries';
 
 export async function GET() {
@@ -10,45 +10,50 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const db = getDb();
   const userId = parseInt(session.user.id);
 
   // Get user profile with team
-  const user = db.prepare(`
+  const user = await db.get(`
     SELECT u.id, u.username, u.display_name, u.avatar_url, u.avatar_frame, u.title,
            u.team_id, u.role,
            t.name as team_name, t.color as team_color, t.total_points as team_beads
     FROM users u
     LEFT JOIN teams t ON u.team_id = t.id
     WHERE u.id = ?
-  `).get(userId) as any;
+  `, userId) as any;
 
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
   // 1. Total counts from task_completions + rosary_beads (robust fallback)
-  const smallFromCompletions = (db.prepare(`
+  const smallCompletionsRow = await db.get(`
     SELECT COALESCE(SUM(tc.beads_earned), 0) as total
     FROM task_completions tc
     JOIN tasks t ON tc.task_id = t.id
     WHERE tc.user_id = ? AND (t.bead_type = 'small' OR t.bead_type IS NULL)
-  `).get(userId) as { total: number }).total;
+  `, userId) as { total: number } | null;
+  const smallFromCompletions = smallCompletionsRow?.total || 0;
 
-  const smallFromBeads = (db.prepare(
-    "SELECT COUNT(*) as cnt FROM rosary_beads WHERE user_id = ? AND bead_type = 'small'"
-  ).get(userId) as { cnt: number }).cnt;
+  const smallBeadsRow = await db.get(
+    "SELECT COUNT(*) as cnt FROM rosary_beads WHERE user_id = ? AND bead_type = 'small'",
+    userId
+  ) as { cnt: number } | null;
+  const smallFromBeads = smallBeadsRow?.cnt || 0;
 
   const smallBeads = Math.max(smallFromCompletions, smallFromBeads);
 
-  const largeFromCompletions = (db.prepare(`
+  const largeCompletionsRow = await db.get(`
     SELECT COALESCE(SUM(tc.beads_earned), 0) as total
     FROM task_completions tc
     JOIN tasks t ON tc.task_id = t.id
     WHERE tc.user_id = ? AND t.bead_type = 'large'
-  `).get(userId) as { total: number }).total;
+  `, userId) as { total: number } | null;
+  const largeFromCompletions = largeCompletionsRow?.total || 0;
 
-  const largeFromBeads = (db.prepare(
-    "SELECT COUNT(*) as cnt FROM rosary_beads WHERE user_id = ? AND bead_type = 'large'"
-  ).get(userId) as { cnt: number }).cnt;
+  const largeBeadsRow = await db.get(
+    "SELECT COUNT(*) as cnt FROM rosary_beads WHERE user_id = ? AND bead_type = 'large'",
+    userId
+  ) as { cnt: number } | null;
+  const largeFromBeads = largeBeadsRow?.cnt || 0;
 
   const largeBeads = Math.max(largeFromCompletions, largeFromBeads);
 
@@ -87,43 +92,45 @@ export async function GET() {
   }
 
   // Get streak
-  const streak = db.prepare(
-    'SELECT current_streak, longest_streak, last_active_date FROM streaks WHERE user_id = ?'
-  ).get(userId) as { current_streak: number; longest_streak: number; last_active_date: string } | null;
+  const streak = await db.get(
+    'SELECT current_streak, longest_streak, last_active_date FROM streaks WHERE user_id = ?',
+    userId
+  ) as { current_streak: number; longest_streak: number; last_active_date: string } | null;
 
   // Get today's task completions
   const today = new Date().toISOString().split('T')[0];
-  const todayCompletions = db.prepare(`
+  const todayCompletions = await db.all(`
     SELECT tc.task_id FROM task_completions tc
     WHERE tc.user_id = ? AND date(tc.completed_at) = ?
-  `).all(userId, today) as { task_id: number }[];
+  `, userId, today) as { task_id: number }[];
 
   const completedTodayIds = new Set(todayCompletions.map(c => c.task_id));
 
   // Get beads added today
-  const todayBeads = (db.prepare(`
+  const todayBeadsRow = await db.get(`
     SELECT COALESCE(SUM(beads_earned), 0) as total
     FROM task_completions
     WHERE user_id = ? AND date(completed_at) = ?
-  `).get(userId, today) as { total: number }).total;
+  `, userId, today) as { total: number } | null;
+  const todayBeads = todayBeadsRow?.total || 0;
 
   // Get recent notifications (unread)
-  const notifications = db.prepare(`
+  const notifications = await db.all(`
     SELECT id, message, notif_type, created_at
     FROM notifications
     WHERE user_id = ? AND is_read = 0
     ORDER BY created_at DESC
     LIMIT 10
-  `).all(userId);
+  `, userId);
 
   // Get team rank (by total_points = team bead count)
   let teamRank = null;
   if (user.team_id) {
-    const rankRow = db.prepare(`
+    const rankRow = await db.get(`
       SELECT COUNT(*) + 1 as rank FROM teams
       WHERE total_points > (SELECT total_points FROM teams WHERE id = ?)
-    `).get(user.team_id) as { rank: number };
-    teamRank = rankRow.rank;
+    `, user.team_id) as { rank: number } | null;
+    teamRank = rankRow?.rank || 1;
   }
 
   return NextResponse.json({

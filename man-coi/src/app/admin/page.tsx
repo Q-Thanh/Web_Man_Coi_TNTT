@@ -52,9 +52,9 @@ export default function AdminPage() {
   const refreshData = async () => {
     try {
       const [s, u, t] = await Promise.all([
-        fetch('/api/admin/stats').then(r => r.json()),
-        fetch('/api/admin/users').then(r => r.json()),
-        fetch('/api/admin/tasks').then(r => r.json()),
+        fetch('/api/admin/stats', { cache: 'no-store' }).then(r => r.json()),
+        fetch('/api/admin/users', { cache: 'no-store' }).then(r => r.json()),
+        fetch('/api/admin/tasks', { cache: 'no-store' }).then(r => r.json()),
       ]);
       setStats(s);
       setUsers(u.users || []);

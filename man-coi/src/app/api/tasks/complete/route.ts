@@ -44,28 +44,77 @@ export async function POST(req: NextRequest) {
 
   const totalBeadCount = smallBeadCount + largeBeadCount;
 
-  // 1. Record completion (points = 0, beads_earned = actual count)
+  // ── Calculate today's Kinh Kính Mừng (small beads) and chuỗi progress ──
+  const todaySmallRow = await db.get(`
+    SELECT COALESCE(SUM(tc.beads_earned), 0) as total
+    FROM task_completions tc
+    JOIN tasks t ON tc.task_id = t.id
+    WHERE tc.user_id = ?
+      AND (t.bead_type = 'small' OR t.bead_type IS NULL)
+      AND date(tc.completed_at, '+7 hours') = date('now', '+7 hours')
+  `, userId) as { total: number } | null;
+
+  const prevSmallToday = todaySmallRow?.total || 0;
+  const newSmallToday = prevSmallToday + (beadType === 'small' ? beadsToAdd : 0);
+
+  // 1 chuỗi = 50 Kinh Kính Mừng
+  const chuoiToday = Math.floor(newSmallToday / 50);
+
+  // Quy tắc tính điểm:
+  // - Ít hơn 3 chuỗi (< 150 kinh): 0 điểm
+  // - Đủ 3 chuỗi (>= 150 kinh): 20 điểm
+  // - Mỗi chuỗi tăng thêm từ chuỗi thứ 4 trở đi: +5 điểm mỗi chuỗi (ví dụ: 4 chuỗi = 25 điểm, 5 chuỗi = 30 điểm)
+  let targetPointsToday = 0;
+  if (chuoiToday >= 3) {
+    targetPointsToday = 20 + (chuoiToday - 3) * 5;
+  }
+
+  // Số điểm đã được ghi nhận hôm nay
+  const awardedRow = await db.get(`
+    SELECT COALESCE(SUM(points_earned), 0) as total
+    FROM task_completions
+    WHERE user_id = ?
+      AND date(completed_at, '+7 hours') = date('now', '+7 hours')
+  `, userId) as { total: number } | null;
+
+  const alreadyAwardedToday = awardedRow?.total || 0;
+  const pointsToAward = Math.max(0, targetPointsToday - alreadyAwardedToday);
+
+  // 1. Record completion with calculated points_earned
   const completion = await db.run(`
     INSERT INTO task_completions (user_id, task_id, points_earned, beads_earned)
-    VALUES (?, ?, 0, ?)
-  `, userId, taskId, beadsToAdd);
+    VALUES (?, ?, ?, ?)
+  `, userId, taskId, pointsToAward, beadsToAdd);
 
   const completionId = completion.lastInsertRowid as number;
 
-  // 2. Award beads to user and team
+  // 2. Award points to user and team only when pointsToAward > 0
   const userRow = await db.get('SELECT team_id FROM users WHERE id = ?', userId) as any;
-  if (userRow?.team_id) {
+  if (pointsToAward > 0) {
+    if (userRow?.team_id) {
+      await db.run(
+        'UPDATE teams SET total_points = total_points + ? WHERE id = ?',
+        pointsToAward, userRow.team_id
+      );
+    }
     await db.run(
-      'UPDATE teams SET total_points = total_points + ? WHERE id = ?',
-      beadsToAdd, userRow.team_id
+      'UPDATE users SET personal_points = personal_points + ? WHERE id = ?',
+      pointsToAward, userId
     );
-  }
 
-  // Update personal bead count stored in personal_points
-  await db.run(
-    'UPDATE users SET personal_points = personal_points + ? WHERE id = ?',
-    beadsToAdd, userId
-  );
+    // Thông báo chúc mừng đạt mốc 3 chuỗi hoặc chuỗi thưởng thêm
+    if (chuoiToday === 3 && alreadyAwardedToday === 0) {
+      await db.run(`
+        INSERT INTO notifications (user_id, message, notif_type)
+        VALUES (?, ?, 'milestone')
+      `, userId, '🎉 Chúc mừng! Bạn đã hoàn thành đủ 3 chuỗi Mân Côi hôm nay (150 kinh) và được cộng 20 điểm thi đua!');
+    } else if (chuoiToday > 3) {
+      await db.run(`
+        INSERT INTO notifications (user_id, message, notif_type)
+        VALUES (?, ?, 'milestone')
+      `, userId, `⭐ Tuyệt vời! Bạn hoàn thành chuỗi thứ ${chuoiToday} hôm nay và nhận thêm +${pointsToAward} điểm thưởng!`);
+    }
+  }
 
   // 3. Update streak
   const streakRow = await db.get('SELECT * FROM streaks WHERE user_id = ?', userId) as any;
@@ -237,6 +286,10 @@ export async function POST(req: NextRequest) {
     beadsLit: newBeadPositions,
     beadType,
     beadsAdded: beadsToAdd,
+    pointsAwarded: pointsToAward,
+    todaySmallBeads: newSmallToday,
+    todayChuoi: chuoiToday,
+    targetPointsToday,
     smallBeads: totalSmall,
     largeBeads: totalLarge,
     totalBeads: newTotalBeads,

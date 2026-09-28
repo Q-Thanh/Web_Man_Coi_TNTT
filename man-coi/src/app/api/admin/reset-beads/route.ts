@@ -3,6 +3,9 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import db from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user || !['ADMIN', 'LEADER'].includes(session.user.role)) {
@@ -50,7 +53,7 @@ export async function POST(req: NextRequest) {
       await db.run('DELETE FROM rosary_beads');
       await db.run('DELETE FROM task_completions');
       await db.run('DELETE FROM streaks');
-      await db.run("UPDATE users SET personal_points = 0 WHERE role IN ('MEMBER', 'CHILD')");
+      await db.run('UPDATE users SET personal_points = 0');
       await db.run('UPDATE teams SET total_points = 0');
       await db.run(
         "UPDATE community_progress SET total_beads = 0, milestone_1 = 0, milestone_2 = 0, milestone_3 = 0, milestone_4 = 0, updated_at = datetime('now')"

@@ -114,6 +114,27 @@ export async function GET() {
   `, userId, today) as { total: number } | null;
   const todayBeads = todayBeadsRow?.total || 0;
 
+  // Get today's small beads (Kinh Kính Mừng) in Vietnam timezone
+  const todaySmallRow = await db.get(`
+    SELECT COALESCE(SUM(tc.beads_earned), 0) as total
+    FROM task_completions tc
+    JOIN tasks t ON tc.task_id = t.id
+    WHERE tc.user_id = ?
+      AND (t.bead_type = 'small' OR t.bead_type IS NULL)
+      AND date(tc.completed_at, '+7 hours') = date('now', '+7 hours')
+  `, userId) as { total: number } | null;
+  const todaySmallBeads = todaySmallRow?.total || 0;
+  const todayChuoi = Math.floor(todaySmallBeads / 50);
+
+  // Get points earned today
+  const todayPointsRow = await db.get(`
+    SELECT COALESCE(SUM(points_earned), 0) as total
+    FROM task_completions
+    WHERE user_id = ?
+      AND date(completed_at, '+7 hours') = date('now', '+7 hours')
+  `, userId) as { total: number } | null;
+  const todayPoints = todayPointsRow?.total || 0;
+
   // Get recent notifications (unread)
   const notifications = await db.all(`
     SELECT id, message, notif_type, created_at
@@ -145,6 +166,7 @@ export async function GET() {
       teamName: user.team_name,
       teamColor: user.team_color,
       teamBeads: user.team_beads || 0,
+      personalPoints: user.personal_points || 0,
       teamRank,
       role: user.role,
     },
@@ -157,6 +179,9 @@ export async function GET() {
     streak: streak || { current_streak: 0, longest_streak: 0, last_active_date: null },
     completedTodayIds: Array.from(completedTodayIds),
     todayBeads,
+    todaySmallBeads,
+    todayChuoi,
+    todayPoints,
     notifications,
   });
 }

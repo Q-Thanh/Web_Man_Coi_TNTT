@@ -29,6 +29,9 @@ interface DashboardData {
   streak: { current_streak: number; longest_streak: number };
   completedTodayIds: number[];
   todayBeads: number;
+  todaySmallBeads?: number;
+  todayChuoi?: number;
+  todayPoints?: number;
 }
 
 interface Task {
@@ -114,6 +117,20 @@ export default function DashboardPage() {
         type: 'success',
         icon: '📿',
       });
+
+      // Special toast if points awarded today
+      if (data.pointsAwarded > 0) {
+        setTimeout(() => {
+          showToast({
+            title: `⭐ +${data.pointsAwarded} điểm thi đua!`,
+            message: data.todayChuoi === 3
+              ? 'Chúc mừng con đã hoàn thành đủ 3 chuỗi Mân Côi hôm nay và nhận trọn 20 điểm!'
+              : `Chúc mừng con đã hoàn thành chuỗi thứ ${data.todayChuoi} hôm nay (+${data.pointsAwarded} điểm thưởng)!`,
+            type: 'success',
+            icon: '🎉',
+          });
+        }, 1200);
+      }
 
       // Earned badges
       for (const badge of data.earnedBadges) {
@@ -228,6 +245,34 @@ export default function DashboardPage() {
                 <div className={styles.statIcon}>🌟</div>
                 <div className={styles.statValue} style={{ color: '#2563EB' }}>+{todayBeads}</div>
                 <div className={styles.statLabel}>Hạt hôm nay</div>
+              </div>
+
+              {/* Daily Mission Target (3 Chuỗi -> 20 Điểm) */}
+              <div style={{
+                gridColumn: '1 / -1',
+                background: (dashData?.todayChuoi || 0) >= 3 ? 'linear-gradient(135deg, #F0FDF4, #DCFCE7)' : 'linear-gradient(135deg, #FFFBEB, #FEF3C7)',
+                border: (dashData?.todayChuoi || 0) >= 3 ? '1.5px solid #86EFAC' : '1.5px solid #FDE68A',
+                borderRadius: 16,
+                padding: '14px 16px',
+                marginTop: 2,
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <span style={{ fontSize: 13.5, fontWeight: 800, color: (dashData?.todayChuoi || 0) >= 3 ? '#166534' : '#92400E' }}>
+                    🎯 Mục tiêu ngày: 3 Chuỗi Mân Côi
+                  </span>
+                  <span style={{
+                    fontSize: 12, fontWeight: 800, padding: '3px 10px', borderRadius: 9999,
+                    background: (dashData?.todayChuoi || 0) >= 3 ? '#16A34A' : '#F59E0B',
+                    color: 'white',
+                  }}>
+                    {(dashData?.todayChuoi || 0) >= 3 ? `✅ Đã đạt (+${dashData?.todayPoints || 20}đ)` : `${dashData?.todayChuoi || 0} / 3 chuỗi`}
+                  </span>
+                </div>
+                <div style={{ fontSize: 12.5, color: (dashData?.todayChuoi || 0) >= 3 ? '#14532D' : '#78350F', lineHeight: 1.45 }}>
+                  {(dashData?.todayChuoi || 0) >= 3
+                    ? `🎉 Chúc mừng con đã hoàn thành ${dashData?.todayChuoi} chuỗi hôm nay (+${dashData?.todayPoints} điểm)! Mỗi chuỗi tiếp theo hôm nay sẽ được thưởng thêm +5 điểm.`
+                    : `Hôm nay con đã đọc ${dashData?.todaySmallBeads || 0} kinh Kính Mừng (${dashData?.todayChuoi || 0}/3 chuỗi). Cần hoàn thành đủ 3 chuỗi (150 kinh) để nhận 20 điểm thi đua hôm nay!`}
+                </div>
               </div>
 
               {/* Team */}

@@ -50,7 +50,7 @@ export default function Header() {
         <nav className={styles.nav}>
           <NavLink href="/dashboard" active={pathname === '/dashboard'}>🏠 Trang chủ</NavLink>
           <NavLink href="/thi-dua" active={pathname === '/thi-dua'}>🏆 Thi đua</NavLink>
-          <NavLink href="/doi" active={pathname.startsWith('/doi')}>👥 Đội của con</NavLink>
+          <NavLink href="/doi" active={pathname.startsWith('/doi')}>👥 Lớp của con</NavLink>
           <NavLink href="/huy-hieu" active={pathname === '/huy-hieu'}>🏅 Huy hiệu</NavLink>
           <NavLink href="/phan-thuong" active={pathname === '/phan-thuong'}>🎁 Phần thưởng</NavLink>
           {(session.user.role === 'ADMIN' || session.user.role === 'LEADER') && (
@@ -90,7 +90,7 @@ export default function Header() {
               <div className={styles.dropdown} onClick={(e) => e.stopPropagation()}>
                 <div className={styles.dropHeader}>
                   <strong>{session.user.name}</strong>
-                  <span className={styles.dropTeam}>{session.user.teamName || 'Chưa có đội'}</span>
+                  <span className={styles.dropTeam}>{session.user.teamName || 'Chưa có lớp'}</span>
                 </div>
                 <Link href="/ho-so" className={styles.dropItem} onClick={() => setAvatarDropdownOpen(false)}>
                   👤 Hồ sơ cá nhân
@@ -124,7 +124,7 @@ export default function Header() {
         <div className={styles.mobileNav}>
           <Link href="/dashboard" onClick={() => setMobileNavOpen(false)}>🏠 Trang chủ</Link>
           <Link href="/thi-dua" onClick={() => setMobileNavOpen(false)}>🏆 Thi đua</Link>
-          <Link href="/doi" onClick={() => setMobileNavOpen(false)}>👥 Đội của con</Link>
+          <Link href="/doi" onClick={() => setMobileNavOpen(false)}>👥 Lớp của con</Link>
           <Link href="/huy-hieu" onClick={() => setMobileNavOpen(false)}>🏅 Huy hiệu</Link>
           <Link href="/phan-thuong" onClick={() => setMobileNavOpen(false)}>🎁 Phần thưởng</Link>
           {(session.user.role === 'ADMIN' || session.user.role === 'LEADER') && (

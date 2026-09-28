@@ -67,7 +67,7 @@ export default function LandingPage() {
         <div className={styles.heroStats}>
           <div className={styles.heroStat}><strong>55</strong><span>hạt Mân Côi</span></div>
           <div className={styles.heroStatDivider} />
-          <div className={styles.heroStat}><strong>6</strong><span>đội thi đua</span></div>
+          <div className={styles.heroStat}><strong>6</strong><span>lớp thi đua</span></div>
           <div className={styles.heroStatDivider} />
           <div className={styles.heroStat}><strong>∞</strong><span>hạt đã sáng</span></div>
         </div>
@@ -82,7 +82,7 @@ export default function LandingPage() {
               { icon: '🎯', title: 'Hoàn thành nhiệm vụ', desc: 'Đọc kinh, làm việc tốt, tham dự Thánh lễ... mỗi việc tốt đều được ghi nhận' },
               { icon: '📿', title: 'Hạt Mân Côi sáng lên', desc: 'Mỗi khi hoàn thành, một hạt trên chuỗi Mân Côi cá nhân của bạn sẽ được thắp sáng' },
               { icon: '⭐', title: 'Nhận điểm & huy hiệu', desc: 'Tích lũy điểm, nhận huy hiệu đặc biệt và các phần thưởng theo cột mốc' },
-              { icon: '👥', title: 'Thi đua cùng đội', desc: 'Đóng góp điểm cho đội, cùng nhau chinh phục bảng xếp hạng với tinh thần đoàn kết' },
+              { icon: '👥', title: 'Thi đua cùng lớp', desc: 'Đóng góp điểm cho lớp, cùng nhau chinh phục bảng xếp hạng với tinh thần đoàn kết' },
             ].map((f, i) => (
               <div key={i} className={styles.featureCard}>
                 <div className={styles.featureIcon}>{f.icon}</div>
@@ -138,7 +138,7 @@ export default function LandingPage() {
       {/* Teams */}
       <section className={styles.teams}>
         <div className={styles.container}>
-          <h2 className={styles.sectionTitle}>6 Đội Thi Đua</h2>
+          <h2 className={styles.sectionTitle}>6 Lớp Thi Đua</h2>
           <div className={styles.teamsGrid}>
             {[
               { name: 'Bao đồng 1A', color: '#2563EB', icon: '🕊️' },

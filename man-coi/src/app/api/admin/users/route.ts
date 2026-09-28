@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, id: result.lastInsertRowid });
   }
 
-  // 2. Cập nhật thông tin thành viên (Đổi tên, đổi đội, đổi vai trò)
+  // 2. Cập nhật thông tin thành viên (Đổi tên, đổi lớp, đổi vai trò)
   if (action === 'update') {
     const userId = parseInt(body.userId);
     const displayName = (body.displayName || '').trim();

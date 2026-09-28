@@ -150,7 +150,7 @@ export default function ThiDuaPage() {
                       style={{ background: team.color }}
                     />
                     <span className={styles.teamName}>{team.name}</span>
-                    {isMyTeam && <span className={styles.myTeamTag}>Đội của bạn</span>}
+                    {isMyTeam && <span className={styles.myTeamTag}>Lớp của bạn</span>}
                   </div>
 
                   {/* Progress bar */}

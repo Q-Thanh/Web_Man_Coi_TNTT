@@ -292,7 +292,7 @@ export default function AdminPage() {
           <h1 style={{ fontSize: 26, fontWeight: 900, color: '#1F2937', margin: 0 }}>⚙️ Quản Trị Hệ Thống</h1>
         </div>
         <p style={{ color: '#6B7280', marginBottom: 24, fontSize: 14 }}>
-          Theo dõi và quản lý thành viên, đội nhóm và các hoạt động thi đua Mân Côi
+          Theo dõi và quản lý thành viên, lớp và các hoạt động thi đua Mân Côi
         </p>
 
         {/* Tabs */}
@@ -329,11 +329,11 @@ export default function AdminPage() {
 
             {/* Teams table */}
             <div style={{ background: 'white', borderRadius: 18, padding: 24, boxShadow: '0 2px 12px rgba(0,0,0,0.06)', marginBottom: 24 }}>
-              <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 16 }}>🏆 Bảng xếp hạng đội</h2>
+              <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 16 }}>🏆 Bảng xếp hạng lớp</h2>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
                 <thead>
                   <tr style={{ background: '#F8FAFF' }}>
-                    {['Hạng', 'Đội', 'Điểm', 'Thành viên'].map(h => (
+                    {['Hạng', 'Lớp', 'Điểm', 'Thành viên'].map(h => (
                       <th key={h} style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 700, color: '#374151' }}>{h}</th>
                     ))}
                   </tr>
@@ -478,7 +478,7 @@ export default function AdminPage() {
                     cursor: 'pointer',
                   }}
                 >
-                  <option value="all">Tất cả các đội ({users.length})</option>
+                  <option value="all">Tất cả các lớp ({users.length})</option>
                   {teams.map(t => (
                     <option key={t.id} value={String(t.id)}>
                       {t.name}
@@ -515,7 +515,7 @@ export default function AdminPage() {
                     <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 700, color: '#334155' }}>STT</th>
                     <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 700, color: '#334155' }}>Họ và tên (Tên Thánh)</th>
                     <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 700, color: '#334155' }}>Tên đăng nhập</th>
-                    <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 700, color: '#334155' }}>Đội</th>
+                    <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 700, color: '#334155' }}>Lớp</th>
                     <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 700, color: '#334155' }}>Vai trò</th>
                     <th style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 700, color: '#334155' }}>Hạt sáng</th>
                     <th style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 700, color: '#334155' }}>Thao tác</th>
@@ -562,7 +562,7 @@ export default function AdminPage() {
                           <div style={{ display: 'inline-flex', gap: 6 }}>
                             <button
                               type="button"
-                              title="Sửa họ tên hoặc chuyển đội"
+                              title="Sửa họ tên hoặc chuyển lớp"
                               onClick={() => openEditModal(user)}
                               style={{
                                 padding: '5px 10px',
@@ -575,7 +575,7 @@ export default function AdminPage() {
                                 cursor: 'pointer',
                               }}
                             >
-                              ✏️ Sửa / Đổi đội
+                              ✏️ Sửa / Đổi lớp
                             </button>
                             <button
                               type="button"
@@ -728,7 +728,7 @@ export default function AdminPage() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
                 <div>
                   <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
-                    Đội tham gia <span style={{ color: '#E11D48' }}>*</span>
+                    Lớp tham gia <span style={{ color: '#E11D48' }}>*</span>
                   </label>
                   <select
                     value={newTeamId}
@@ -808,7 +808,7 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* ─── MODAL: SỬA THÀNH VIÊN & CHUYỂN ĐỘI ─── */}
+      {/* ─── MODAL: SỬA THÀNH VIÊN & CHUYỂN LỚP ─── */}
       {showEditModal && editingUser && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -861,7 +861,7 @@ export default function AdminPage() {
 
               <div style={{ marginBottom: 14 }}>
                 <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
-                  Chuyển đội tham gia
+                  Chuyển lớp tham gia
                 </label>
                 <select
                   value={editTeamId}
@@ -871,13 +871,13 @@ export default function AdminPage() {
                     border: '1.5px solid #CBD5E1', fontSize: 14, fontFamily: 'inherit', background: 'white', boxSizing: 'border-box',
                   }}
                 >
-                  <option value="">— Chưa phân đội —</option>
+                  <option value="">— Chưa phân lớp —</option>
                   {teams.map(t => (
                     <option key={t.id} value={String(t.id)}>{t.name}</option>
                   ))}
                 </select>
                 <span style={{ fontSize: 11, color: '#64748B', display: 'block', marginTop: 4 }}>
-                  💡 Điểm số của em sẽ tự động được tính cho đội mới sau khi chuyển.
+                  💡 Điểm số của em sẽ tự động được tính cho lớp mới sau khi chuyển.
                 </span>
               </div>
 

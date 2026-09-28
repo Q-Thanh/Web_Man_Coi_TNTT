@@ -58,7 +58,7 @@ export default function HoSoPage() {
                 </div>
               )}
               <div style={{ fontSize: 14, color: '#6B7280', marginTop: 4 }}>
-                {user.teamName ? `👥 Đội ${user.teamName}` : ''}
+                {user.teamName ? `👥 Lớp ${user.teamName}` : ''}
               </div>
             </div>
           </div>

@@ -42,8 +42,8 @@ export default function DoiPage() {
         <main style={mainStyle}>
           <div style={{ textAlign: 'center', padding: '80px 0', color: '#6B7280' }}>
             <div style={{ fontSize: 56, marginBottom: 16 }}>👥</div>
-            <h2 style={{ color: '#1F2937', marginBottom: 8 }}>Bạn chưa có đội</h2>
-            <p>Liên hệ giáo lý viên để được phân công vào một đội.</p>
+            <h2 style={{ color: '#1F2937', marginBottom: 8 }}>Bạn chưa có lớp</h2>
+            <p>Liên hệ giáo lý viên để được phân công vào một lớp.</p>
           </div>
         </main>
       </div>
@@ -72,7 +72,7 @@ export default function DoiPage() {
         }}>
           <div style={{ position: 'absolute', right: -20, top: -20, fontSize: 120, opacity: 0.1 }}>👥</div>
           <div style={{ fontSize: 14, opacity: 0.85, marginBottom: 8 }}>Hạng #{teamData.rank} • {teamData.member_count} thành viên</div>
-          <h1 style={{ fontSize: 36, fontWeight: 900, marginBottom: 8 }}>Đội {teamData.name}</h1>
+          <h1 style={{ fontSize: 36, fontWeight: 900, marginBottom: 8 }}>Lớp {teamData.name}</h1>
           <div style={{ fontSize: 28, fontWeight: 800 }}>{formatPoints(teamData.total_points)} <span style={{ fontSize: 16, opacity: 0.75 }}>điểm</span></div>
 
           <div style={{ marginTop: 20, background: 'rgba(255,255,255,0.2)', borderRadius: 9999, height: 10, overflow: 'hidden' }}>
@@ -92,7 +92,7 @@ export default function DoiPage() {
           color: '#1F2937',
           boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
         }}>
-          💪 Mỗi hạt của bạn là một bước tiến của cả đội!
+          💪 Mỗi hạt của bạn là một bước tiến của cả lớp!
         </div>
 
         {/* Top members */}
@@ -102,7 +102,7 @@ export default function DoiPage() {
           </h2>
           {(!teamData.topMembers || teamData.topMembers.length === 0) ? (
             <p style={{ color: '#9CA3AF', textAlign: 'center', margin: '20px 0', fontSize: 14 }}>
-              Chưa có thành viên nào ghi nhận điểm. Hãy là người đầu tiên dâng hoa Mân Côi cho đội!
+              Chưa có thành viên nào ghi nhận điểm. Hãy là người đầu tiên dâng hoa Mân Côi cho lớp!
             </p>
           ) : (
             teamData.topMembers.map((member: any, i: number) => (

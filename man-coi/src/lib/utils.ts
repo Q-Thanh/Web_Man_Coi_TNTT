@@ -36,12 +36,12 @@ export function getMotivationMessage(
   teamAhead?: string
 ): string {
   if (rank === 1) {
-    return `👑 Đội ${teamName} đang dẫn đầu! Hãy cùng tiếp tục cố gắng!`;
+    return `👑 Lớp ${teamName} đang dẫn đầu! Hãy cùng tiếp tục cố gắng!`;
   }
   if (rank === 2 && teamAhead && pointsBehind !== undefined) {
     return `🔥 Chỉ còn ${formatPoints(pointsBehind)} điểm nữa để vượt ${teamAhead}!`;
   }
-  return `🚀 Đội ${teamName} đang tiến bộ! Mỗi hạt là một bước tiến!`;
+  return `🚀 Lớp ${teamName} đang tiến bộ! Mỗi hạt là một bước tiến!`;
 }
 
 export function getProgressPercent(current: number, total: number): number {

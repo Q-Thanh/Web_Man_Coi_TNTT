@@ -29,23 +29,7 @@ export default function LandingPage() {
 
       {/* Hero */}
       <section className={styles.hero}>
-        <div className={styles.heroBg}>
-          {/* Floating rosary beads decoration */}
-          {Array.from({ length: 20 }, (_, i) => (
-            <div
-              key={i}
-              className={styles.floatBead}
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${i * 0.3}s`,
-                width: i % 5 === 0 ? 18 : 12,
-                height: i % 5 === 0 ? 18 : 12,
-                opacity: 0.1 + Math.random() * 0.2,
-              }}
-            />
-          ))}
-        </div>
+        <div className={styles.heroBg} />
 
         <div className={styles.heroContent}>
           <div className={styles.heroIcon}>📿</div>

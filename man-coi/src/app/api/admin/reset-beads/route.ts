@@ -25,7 +25,9 @@ export async function POST(req: NextRequest) {
       await db.run('DELETE FROM rosary_beads WHERE user_id = ?', targetUserId);
       await db.run('DELETE FROM task_completions WHERE user_id = ?', targetUserId);
       await db.run('DELETE FROM streaks WHERE user_id = ?', targetUserId);
-      await db.run('UPDATE users SET personal_points = 0 WHERE id = ?', targetUserId);
+      await db.run('DELETE FROM user_badges WHERE user_id = ?', targetUserId);
+      await db.run('DELETE FROM user_rewards WHERE user_id = ?', targetUserId);
+      await db.run('UPDATE users SET personal_points = 0, today_points = 0 WHERE id = ?', targetUserId);
 
       // Recalculate team points
       const user = await db.get('SELECT team_id FROM users WHERE id = ?', targetUserId) as any;
@@ -46,14 +48,16 @@ export async function POST(req: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        message: 'Đã xóa toàn bộ hạt và điểm của thành viên được chọn về 0 thành công!',
+        message: 'Đã xóa toàn bộ hạt, điểm và chuỗi ngày (streak) của thành viên được chọn về 0 thành công!',
       });
     } else {
-      // 2. Reset ALL test beads & completions
+      // 2. Reset ALL test beads, points, streaks, badges & completions for clean start
       await db.run('DELETE FROM rosary_beads');
       await db.run('DELETE FROM task_completions');
       await db.run('DELETE FROM streaks');
-      await db.run('UPDATE users SET personal_points = 0');
+      await db.run('DELETE FROM user_badges');
+      await db.run('DELETE FROM user_rewards');
+      await db.run('UPDATE users SET personal_points = 0, today_points = 0');
       await db.run('UPDATE teams SET total_points = 0');
       await db.run(
         "UPDATE community_progress SET total_beads = 0, milestone_1 = 0, milestone_2 = 0, milestone_3 = 0, milestone_4 = 0, updated_at = datetime('now')"
@@ -61,7 +65,7 @@ export async function POST(req: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        message: 'Đã xóa toàn bộ hạt test và đưa tiến độ toàn đoàn về 0 thành công!',
+        message: 'Đã xóa toàn bộ hạt test, điểm số, chuỗi streak và đưa tiến độ toàn đoàn về 0 thành công!',
       });
     }
   } catch (error: any) {

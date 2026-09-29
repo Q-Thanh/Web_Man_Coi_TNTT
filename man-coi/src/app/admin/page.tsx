@@ -248,9 +248,9 @@ export default function AdminPage() {
     }
   };
 
-  // Reset all test beads
+  // Reset all test beads & scores
   const handleResetAllBeads = async () => {
-    if (!window.confirm('⚠️ CẢNH BÁO: Bạn có chắc chắn muốn xóa TOÀN BỘ hạt mân côi đã sáng và đưa điểm số của tất cả các em về 0 để chuẩn bị thi đua chính thức không?')) {
+    if (!window.confirm('⚠️ CẢNH BÁO: Bạn có chắc chắn muốn xóa TOÀN BỘ hạt Mân Côi đã sáng, đưa điểm số, chuỗi streak và tiến độ toàn đoàn về 0 để chuẩn bị bước vào cuộc hành trình mới không?')) {
       return;
     }
     setResetting(true);
@@ -261,7 +261,7 @@ export default function AdminPage() {
       });
       const data = await res.json();
       if (res.ok) {
-        alert(data.message || 'Đã reset toàn bộ hạt về 0 thành công!');
+        alert(data.message || 'Đã reset toàn bộ về 0 thành công!');
         refreshData();
       } else {
         alert(data.error || 'Có lỗi xảy ra khi xóa dữ liệu');
@@ -430,7 +430,7 @@ export default function AdminPage() {
                     fontFamily: 'inherit',
                   }}
                 >
-                  {resetting ? '⏳ Đang xóa...' : '🔄 Xóa toàn bộ hạt test (Về 0)'}
+                  {resetting ? '⏳ Đang xóa...' : '🔄 Xóa toàn bộ dữ liệu test về 0 (Hạt, Điểm, Streak)'}
                 </button>
               </div>
             </div>

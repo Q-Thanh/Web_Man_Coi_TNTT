@@ -17,9 +17,12 @@ export const db = {
     const res = await client.execute({ sql, args });
     return (res.rows[0] as unknown as T) || null;
   },
-  async run(sql: string, ...args: any[]): Promise<{ lastInsertRowid?: number | bigint; rowsAffected: number }> {
+  async run(sql: string, ...args: any[]): Promise<{ lastInsertRowid?: number; rowsAffected: number }> {
     const res = await client.execute({ sql, args });
-    return { lastInsertRowid: res.lastInsertRowid, rowsAffected: res.rowsAffected };
+    return {
+      lastInsertRowid: res.lastInsertRowid !== undefined && res.lastInsertRowid !== null ? Number(res.lastInsertRowid) : undefined,
+      rowsAffected: res.rowsAffected,
+    };
   },
   async batch(statements: Array<{ sql: string; args?: any[] }>) {
     return await client.batch(statements, 'write');

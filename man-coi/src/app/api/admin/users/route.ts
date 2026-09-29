@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
         VALUES (?, ?, ?, ?, ?, 0)
       `, username, displayName, hash, role, teamId);
 
-      return NextResponse.json({ success: true, id: result.lastInsertRowid });
+      return NextResponse.json({ success: true, id: result.lastInsertRowid ? Number(result.lastInsertRowid) : undefined });
     }
 
     // 2. Cập nhật thông tin thành viên (Đổi tên, đổi lớp, đổi vai trò)

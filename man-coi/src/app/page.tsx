@@ -32,28 +32,38 @@ export default function LandingPage() {
         <div className={styles.heroBg} />
 
         <div className={styles.heroContent}>
-          <div className={styles.heroIcon}>📿</div>
+          <div className={styles.heroBadge}>
+            <span>🌹</span> GIÁO XỨ TÂN HƯƠNG • THIẾU NHI THÁNH THỂ
+          </div>
           <h1 className={styles.heroTitle}>
             Mỗi hạt – Một bước yêu thương
           </h1>
           <p className={styles.heroSub}>
-            Cùng nhau xây dựng thói quen cầu nguyện,<br />
-            việc tốt và tinh thần đoàn kết.
+            Cùng Mẹ Maria dâng lên Chúa những lời kinh sốt sắng, xây dựng thói quen cầu nguyện, việc lành và tinh thần đoàn kết.
           </p>
           <div className={styles.heroBtns}>
             <Link href="/login" className={styles.heroBtn}>
-              📿 Bắt đầu hành trình
+              <span>📿</span> Bắt đầu hành trình
             </Link>
           </div>
-        </div>
 
-        {/* Stats row */}
-        <div className={styles.heroStats}>
-          <div className={styles.heroStat}><strong>55</strong><span>hạt Mân Côi</span></div>
-          <div className={styles.heroStatDivider} />
-          <div className={styles.heroStat}><strong>6</strong><span>lớp thi đua</span></div>
-          <div className={styles.heroStatDivider} />
-          <div className={styles.heroStat}><strong>∞</strong><span>hạt đã sáng</span></div>
+          {/* Stats row integrated seamlessly */}
+          <div className={styles.heroStats}>
+            <div className={styles.heroStat}>
+              <strong>55</strong>
+              <span>hạt Mân Côi</span>
+            </div>
+            <div className={styles.heroStatDivider} />
+            <div className={styles.heroStat}>
+              <strong>6</strong>
+              <span>lớp thi đua</span>
+            </div>
+            <div className={styles.heroStatDivider} />
+            <div className={styles.heroStat}>
+              <strong>∞</strong>
+              <span>hoa thiêng dâng Mẹ</span>
+            </div>
+          </div>
         </div>
       </section>
 

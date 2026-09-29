@@ -117,27 +117,6 @@ export default function LoginPage() {
             )}
           </button>
         </form>
-
-        {/* Demo accounts hint */}
-        <div className={styles.demoHint}>
-          <p className={styles.demoTitle}>Tài khoản demo:</p>
-          <div className={styles.demoList}>
-            {[
-              { u: 'gioakim_nguyenhoangan', p: '123456', label: '👧 Thiếu nhi (Bao đồng 1A)' },
-              { u: 'giaoly1', p: 'gly123', label: '📚 Giáo lý viên' },
-              { u: 'admin', p: 'admin123', label: '⚙️ Quản trị viên' },
-            ].map(acc => (
-              <button
-                key={acc.u}
-                className={styles.demoBtn}
-                onClick={() => { setUsername(acc.u); setPassword(acc.p); }}
-                type="button"
-              >
-                {acc.label}
-              </button>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   );

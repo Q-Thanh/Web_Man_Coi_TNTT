@@ -236,7 +236,12 @@ export default function AdminPage() {
           userId: user.id,
         }),
       });
-      const data = await res.json();
+      let data: any = {};
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error(`Máy chủ phản hồi mã lỗi ${res.status}`);
+      }
       if (res.ok) {
         alert(`✅ Đã xóa tài khoản "${user.display_name}"`);
         refreshData();
@@ -244,7 +249,7 @@ export default function AdminPage() {
         alert(data.error || 'Lỗi khi xóa tài khoản');
       }
     } catch (err: any) {
-      alert('Lỗi kết nối: ' + err.message);
+      alert('Lỗi: ' + err.message);
     }
   };
 

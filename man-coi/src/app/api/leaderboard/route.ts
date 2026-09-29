@@ -2,16 +2,17 @@ import { NextResponse } from 'next/server';
 import db from '@/lib/db';
 
 export async function GET() {
-  // Get all teams sorted by bead count (total_points repurposed as bead count)
+  // Get all teams sorted by total points
   const teams = await db.all(`
     SELECT t.*,
-           COUNT(u.id) as member_count,
-           COALESCE(SUM(CASE WHEN date(tc.completed_at) = date('now') THEN tc.beads_earned ELSE 0 END), 0) as today_beads
+           COUNT(DISTINCT u.id) as member_count,
+           COALESCE(SUM(CASE WHEN date(tc.completed_at) = date('now') THEN tc.beads_earned ELSE 0 END), 0) as today_beads,
+           COALESCE(COUNT(DISTINCT CASE WHEN date(tc.completed_at) = date('now') THEN tc.id ELSE NULL END), 0) as today_completions
     FROM teams t
     LEFT JOIN users u ON u.team_id = t.id
     LEFT JOIN task_completions tc ON tc.user_id = u.id
     GROUP BY t.id
-    ORDER BY t.total_points DESC
+    ORDER BY t.total_points DESC, t.name ASC
   `) as any[];
 
   // Get team streak info (avg of members)

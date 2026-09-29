@@ -58,16 +58,19 @@ export default function ThiDuaPage() {
   }
 
   const myTeam = data.teams.find(t => t.name === session?.user?.teamName);
-  const topTeam = data.teams[0];
   const communityPct = Math.min((data.community.total_beads / data.communityGoal) * 100, 100);
 
+  const hasStarted = data.teams.some(t => (t.total_points || 0) > 0) || (data.community?.total_beads || 0) > 0;
+
   const motivationMsg = myTeam
-    ? getMotivationMessage(
-        myTeam.rank,
-        myTeam.name,
-        myTeam.rank > 1 ? data.teams[myTeam.rank - 2].total_points - myTeam.total_points : 0,
-        myTeam.rank > 1 ? data.teams[myTeam.rank - 2].name : undefined
-      )
+    ? hasStarted
+      ? getMotivationMessage(
+          myTeam.rank,
+          myTeam.name,
+          myTeam.rank > 1 ? data.teams[myTeam.rank - 2].total_points - myTeam.total_points : 0,
+          myTeam.rank > 1 ? data.teams[myTeam.rank - 2].name : undefined
+        )
+      : `🕊️ Hành trình Mân Côi đã sẵn sàng! Hãy cùng ${myTeam.name} thắp sáng những hạt kinh đầu tiên!`
     : null;
 
   return (
@@ -180,34 +183,52 @@ export default function ThiDuaPage() {
         {/* Achievements grid */}
         <h2 className={styles.subTitle}>🏅 Thành tích đặc biệt</h2>
         <div className={styles.achievementsGrid}>
-          <AchievementCard
-            icon="🏆"
-            title="Nhiều điểm nhất"
-            team={data.teams[0]?.name}
-            color={data.teams[0]?.color}
-            value={`${formatPoints(data.teams[0]?.total_points || 0)} điểm`}
-          />
-          <AchievementCard
-            icon="🚀"
-            title="Tiến bộ hôm nay"
-            team={[...data.teams].sort((a, b) => b.today_completions - a.today_completions)[0]?.name}
-            color={[...data.teams].sort((a, b) => b.today_completions - a.today_completions)[0]?.color}
-            value={`${[...data.teams].sort((a, b) => b.today_completions - a.today_completions)[0]?.today_completions || 0} nhiệm vụ`}
-          />
-          <AchievementCard
-            icon="🔥"
-            title="Streak tốt nhất"
-            team={[...data.teams].sort((a, b) => b.streakInfo.max - a.streakInfo.max)[0]?.name}
-            color={[...data.teams].sort((a, b) => b.streakInfo.max - a.streakInfo.max)[0]?.color}
-            value={`${[...data.teams].sort((a, b) => b.streakInfo.max - a.streakInfo.max)[0]?.streakInfo?.max || 0} ngày`}
-          />
-          <AchievementCard
-            icon="❤️"
-            title="Tích cực nhất"
-            team={[...data.teams].sort((a, b) => b.member_count - a.member_count)[0]?.name}
-            color={[...data.teams].sort((a, b) => b.member_count - a.member_count)[0]?.color}
-            value={`${[...data.teams].sort((a, b) => b.member_count - a.member_count)[0]?.member_count || 0} thành viên`}
-          />
+          {(() => {
+            const sortedByPoints = [...data.teams].sort((a, b) => (b.total_points || 0) - (a.total_points || 0));
+            const topPointsTeam = (sortedByPoints[0]?.total_points || 0) > 0 ? sortedByPoints[0] : null;
+
+            const sortedByToday = [...data.teams].sort((a, b) => (b.today_completions || 0) - (a.today_completions || 0));
+            const topTodayTeam = (sortedByToday[0]?.today_completions || 0) > 0 ? sortedByToday[0] : null;
+
+            const sortedByStreak = [...data.teams].sort((a, b) => (b.streakInfo?.max || 0) - (a.streakInfo?.max || 0));
+            const topStreakTeam = (sortedByStreak[0]?.streakInfo?.max || 0) > 0 ? sortedByStreak[0] : null;
+
+            const sortedByMembers = [...data.teams].sort((a, b) => (b.member_count || 0) - (a.member_count || 0));
+            const topMemberTeam = (sortedByMembers[0]?.member_count || 0) > 0 ? sortedByMembers[0] : null;
+
+            return (
+              <>
+                <AchievementCard
+                  icon="🏆"
+                  title="Nhiều điểm nhất"
+                  team={topPointsTeam?.name || null}
+                  color={topPointsTeam?.color}
+                  value={topPointsTeam ? `${formatPoints(topPointsTeam.total_points)} điểm` : 'Đang chờ ghi nhận'}
+                />
+                <AchievementCard
+                  icon="🚀"
+                  title="Tiến bộ hôm nay"
+                  team={topTodayTeam?.name || null}
+                  color={topTodayTeam?.color}
+                  value={topTodayTeam ? `${topTodayTeam.today_completions} nhiệm vụ` : 'Chưa có lượt đọc'}
+                />
+                <AchievementCard
+                  icon="🔥"
+                  title="Streak tốt nhất"
+                  team={topStreakTeam?.name || null}
+                  color={topStreakTeam?.color}
+                  value={topStreakTeam ? `${topStreakTeam.streakInfo.max} ngày` : 'Chưa có chuỗi ngày'}
+                />
+                <AchievementCard
+                  icon="👥"
+                  title="Đông thành viên nhất"
+                  team={topMemberTeam?.name || null}
+                  color={topMemberTeam?.color}
+                  value={topMemberTeam ? `${topMemberTeam.member_count} thành viên` : 'Chưa có thành viên'}
+                />
+              </>
+            );
+          })()}
         </div>
       </main>
     </div>
@@ -215,16 +236,21 @@ export default function ThiDuaPage() {
 }
 
 function AchievementCard({ icon, title, team, color, value }: {
-  icon: string; title: string; team?: string; color?: string; value: string;
+  icon: string; title: string; team?: string | null; color?: string; value: string;
 }) {
   return (
     <div className={styles.achieveCard}>
       <div className={styles.achieveIcon}>{icon}</div>
       <div className={styles.achieveTitle}>{title}</div>
-      {team && (
-        <div className={styles.achieveTeam} style={{ color: color || '#2563EB' }}>{team}</div>
-      )}
-      <div className={styles.achieveValue}>{value}</div>
+      <div
+        className={styles.achieveTeam}
+        style={{ color: team ? (color || '#2563EB') : '#9CA3AF', fontStyle: team ? 'normal' : 'italic' }}
+      >
+        {team || 'Chưa có'}
+      </div>
+      <div className={styles.achieveValue} style={{ color: team ? undefined : '#6B7280' }}>
+        {value}
+      </div>
     </div>
   );
 }

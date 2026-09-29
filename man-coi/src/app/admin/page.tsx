@@ -83,7 +83,7 @@ export default function AdminPage() {
         setLoadError(null);
       }
 
-      if (s) setStats(s);
+      if (s && !s.error) setStats(s);
       if (Array.isArray(u?.users)) setUsers(u.users);
       if (Array.isArray(u?.teams) && u.teams.length > 0) setTeams(u.teams);
       if (Array.isArray(t?.tasks)) setTasks(t.tasks);
@@ -345,15 +345,15 @@ export default function AdminPage() {
         </div>
 
         {/* ─── TAB 1: TỔNG QUAN ─── */}
-        {activeTab === 'overview' && stats && (
+        {activeTab === 'overview' && (
           <div>
             {/* Stats cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16, marginBottom: 28 }}>
               {[
-                { icon: '👧', label: 'Thiếu nhi', value: stats.stats.totalUsers },
-                { icon: '✅', label: 'Nhiệm vụ hoàn thành', value: stats.stats.totalCompletions.toLocaleString('vi-VN') },
-                { icon: '📿', label: 'Tổng hạt sáng', value: stats.stats.totalBeads.toLocaleString('vi-VN') },
-                { icon: '🌟', label: 'Hôm nay', value: stats.stats.todayCompletions },
+                { icon: '👧', label: 'Thiếu nhi', value: stats?.stats?.totalUsers ?? users.length },
+                { icon: '✅', label: 'Nhiệm vụ hoàn thành', value: (stats?.stats?.totalCompletions ?? 0).toLocaleString('vi-VN') },
+                { icon: '📿', label: 'Tổng hạt sáng', value: (stats?.stats?.totalBeads ?? 0).toLocaleString('vi-VN') },
+                { icon: '🌟', label: 'Hôm nay', value: stats?.stats?.todayCompletions ?? 0 },
               ].map(card => (
                 <div key={card.label} style={{ background: 'white', borderRadius: 16, padding: '20px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', textAlign: 'center' }}>
                   <div style={{ fontSize: 32, marginBottom: 8 }}>{card.icon}</div>
@@ -375,19 +375,22 @@ export default function AdminPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {stats.teams.map((team: any, i: number) => (
-                    <tr key={team.name} style={{ borderTop: '1px solid #F3F4F6' }}>
-                      <td style={{ padding: '10px 12px', fontWeight: 700 }}>{i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`}</td>
-                      <td style={{ padding: '10px 12px' }}>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-                          <span style={{ width: 10, height: 10, borderRadius: '50%', background: team.color, display: 'inline-block' }} />
-                          {team.name}
-                        </span>
-                      </td>
-                      <td style={{ padding: '10px 12px', fontWeight: 700, color: '#2563EB' }}>{formatPoints(team.total_points)}</td>
-                      <td style={{ padding: '10px 12px' }}>{team.member_count}</td>
-                    </tr>
-                  ))}
+                  {((stats?.teams && stats.teams.length > 0) ? stats.teams : teams).map((team: any, i: number) => {
+                    const memberCnt = team.member_count ?? users.filter(u => u.team_id === team.id).length;
+                    return (
+                      <tr key={team.name} style={{ borderTop: '1px solid #F3F4F6' }}>
+                        <td style={{ padding: '10px 12px', fontWeight: 700 }}>{i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`}</td>
+                        <td style={{ padding: '10px 12px' }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                            <span style={{ width: 10, height: 10, borderRadius: '50%', background: team.color, display: 'inline-block' }} />
+                            {team.name}
+                          </span>
+                        </td>
+                        <td style={{ padding: '10px 12px', fontWeight: 700, color: '#2563EB' }}>{formatPoints(team.total_points || 0)}</td>
+                        <td style={{ padding: '10px 12px' }}>{memberCnt}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -395,18 +398,24 @@ export default function AdminPage() {
             {/* Recent activity */}
             <div style={{ background: 'white', borderRadius: 18, padding: 24, boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
               <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 16 }}>⚡ Hoạt động gần đây</h2>
-              {stats.recentActivity.map((act: any, i: number) => (
-                <div key={i} style={{ display: 'flex', gap: 12, padding: '10px 0', borderTop: i > 0 ? '1px solid #F3F4F6' : 'none', fontSize: 14 }}>
-                  <span>✅</span>
-                  <div style={{ flex: 1 }}>
-                    <strong>{act.display_name}</strong> hoàn thành <em>{act.title}</em>
-                  </div>
-                  <span style={{ color: '#F59E0B', fontWeight: 700 }}>+{act.points_earned}</span>
-                  <span style={{ color: '#9CA3AF', fontSize: 12 }}>
-                    {new Date(act.completed_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
-                  </span>
+              {(!stats?.recentActivity || stats.recentActivity.length === 0) ? (
+                <div style={{ color: '#9CA3AF', fontSize: 14, textAlign: 'center', padding: '16px 0' }}>
+                  Chưa có hoạt động đọc kinh nào gần đây.
                 </div>
-              ))}
+              ) : (
+                stats.recentActivity.map((act: any, i: number) => (
+                  <div key={i} style={{ display: 'flex', gap: 12, padding: '10px 0', borderTop: i > 0 ? '1px solid #F3F4F6' : 'none', fontSize: 14 }}>
+                    <span>✅</span>
+                    <div style={{ flex: 1 }}>
+                      <strong>{act.display_name}</strong> hoàn thành <em>{act.title}</em>
+                    </div>
+                    <span style={{ color: '#F59E0B', fontWeight: 700 }}>+{act.points_earned}</span>
+                    <span style={{ color: '#9CA3AF', fontSize: 12 }}>
+                      {new Date(act.completed_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                ))
+              )}
             </div>
 
             {/* Danger / Reset Tools */}

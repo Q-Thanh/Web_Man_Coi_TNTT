@@ -17,7 +17,7 @@ export async function GET() {
     const users = await db.all(`
       SELECT u.id, u.username, u.display_name, u.role, u.team_id, u.personal_points,
              t.name as team_name, t.color as team_color,
-             (SELECT COUNT(*) FROM rosary_beads WHERE user_id = u.id) as bead_count,
+             COALESCE((SELECT SUM(beads_earned) FROM task_completions WHERE user_id = u.id), 0) as bead_count,
              (SELECT current_streak FROM streaks WHERE user_id = u.id LIMIT 1) as streak
       FROM users u
       LEFT JOIN teams t ON u.team_id = t.id

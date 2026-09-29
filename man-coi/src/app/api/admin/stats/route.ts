@@ -14,7 +14,7 @@ export async function GET() {
 
   const userRow = await db.get('SELECT COUNT(*) as cnt FROM users WHERE role = "CHILD"') as any;
   const compRow = await db.get('SELECT COUNT(*) as cnt FROM task_completions') as any;
-  const beadRow = await db.get('SELECT COUNT(*) as cnt FROM rosary_beads') as any;
+  const beadRow = await db.get('SELECT COALESCE(SUM(beads_earned), 0) as cnt FROM task_completions') as any;
 
   const totalUsers = userRow?.cnt || 0;
   const totalCompletions = compRow?.cnt || 0;
@@ -35,7 +35,7 @@ export async function GET() {
 
   const topUsers = await db.all(`
     SELECT u.display_name, u.personal_points, t.name as team_name,
-           (SELECT COUNT(*) FROM rosary_beads WHERE user_id = u.id) as bead_count
+           COALESCE((SELECT SUM(beads_earned) FROM task_completions WHERE user_id = u.id), 0) as bead_count
     FROM users u
     LEFT JOIN teams t ON u.team_id = t.id
     WHERE u.role = 'CHILD'

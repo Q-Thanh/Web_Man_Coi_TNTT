@@ -172,30 +172,34 @@ export async function POST(req: NextRequest) {
   if (beadType === 'small') {
     const prevSmall = totalSmall - beadsToAdd;
     for (let s = prevSmall + 1; s <= totalSmall; s++) {
-      if (s <= 50) {
-        try {
-          await db.run(`
-            INSERT OR IGNORE INTO rosary_beads (user_id, bead_position, bead_type, task_completion_id)
-            VALUES (?, ?, 'small', ?)
-          `, userId, s, completionId);
-          newBeadPositions.push(s);
-        } catch {}
-      }
+      const posOnChain = ((s - 1) % 50) + 1;
+      try {
+        await db.run(`
+          INSERT INTO rosary_beads (user_id, bead_position, bead_type, task_completion_id)
+          VALUES (?, ?, 'small', ?)
+          ON CONFLICT(user_id, bead_position) DO UPDATE SET
+            lit_at = datetime('now'),
+            task_completion_id = excluded.task_completion_id
+        `, userId, posOnChain, completionId);
+        newBeadPositions.push(posOnChain);
+      } catch {}
     }
   } else {
     const prevLarge = totalLarge - beadsToAdd;
     const largePositions = [51, 52, 53, 54, 55, 56];
     for (let l = prevLarge + 1; l <= totalLarge; l++) {
-      if (l <= largePositions.length) {
-        const pos = largePositions[l - 1];
-        try {
-          await db.run(`
-            INSERT OR IGNORE INTO rosary_beads (user_id, bead_position, bead_type, task_completion_id)
-            VALUES (?, ?, 'large', ?)
-          `, userId, pos, completionId);
-          newBeadPositions.push(pos);
-        } catch {}
-      }
+      const idx = (l - 1) % largePositions.length;
+      const pos = largePositions[idx];
+      try {
+        await db.run(`
+          INSERT INTO rosary_beads (user_id, bead_position, bead_type, task_completion_id)
+          VALUES (?, ?, 'large', ?)
+          ON CONFLICT(user_id, bead_position) DO UPDATE SET
+            lit_at = datetime('now'),
+            task_completion_id = excluded.task_completion_id
+        `, userId, pos, completionId);
+        newBeadPositions.push(pos);
+      } catch {}
     }
   }
 

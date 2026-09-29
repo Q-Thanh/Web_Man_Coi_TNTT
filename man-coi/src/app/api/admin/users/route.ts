@@ -8,23 +8,28 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user || !['ADMIN', 'LEADER'].includes(session.user.role)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user || !['ADMIN', 'LEADER'].includes(session.user.role)) {
+      return NextResponse.json({ error: 'Unauthorized', code: 'UNAUTHORIZED' }, { status: 403 });
+    }
+
+    const users = await db.all(`
+      SELECT u.id, u.username, u.display_name, u.role, u.team_id, u.personal_points,
+             t.name as team_name, t.color as team_color,
+             (SELECT COUNT(*) FROM rosary_beads WHERE user_id = u.id) as bead_count,
+             (SELECT current_streak FROM streaks WHERE user_id = u.id LIMIT 1) as streak
+      FROM users u
+      LEFT JOIN teams t ON u.team_id = t.id
+      ORDER BY u.role, t.id, u.display_name ASC
+    `);
+
+    const teams = await db.all('SELECT id, name, color FROM teams ORDER BY id ASC');
+    return NextResponse.json({ users, teams });
+  } catch (err: any) {
+    console.error('Lỗi khi lấy danh sách users:', err);
+    return NextResponse.json({ error: err.message || 'Lỗi server', users: [], teams: [] }, { status: 500 });
   }
-
-  const users = await db.all(`
-    SELECT u.id, u.username, u.display_name, u.role, u.team_id, u.personal_points,
-           t.name as team_name, t.color as team_color,
-           (SELECT COUNT(*) FROM rosary_beads WHERE user_id = u.id) as bead_count,
-           (SELECT current_streak FROM streaks WHERE user_id = u.id) as streak
-    FROM users u
-    LEFT JOIN teams t ON u.team_id = t.id
-    ORDER BY u.role, t.id, u.display_name ASC
-  `);
-
-  const teams = await db.all('SELECT id, name, color FROM teams ORDER BY id ASC');
-  return NextResponse.json({ users, teams });
 }
 
 export async function POST(req: NextRequest) {

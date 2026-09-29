@@ -15,16 +15,27 @@ function removeVietnameseTones(str: string): string {
     .replace(/[^a-z0-9]/g, '');
 }
 
+const DEFAULT_TEAMS = [
+  { id: 1, name: 'Bao đồng 1A', color: '#2563EB' },
+  { id: 2, name: 'Bao đồng 1B', color: '#059669' },
+  { id: 3, name: 'Bao đồng 1C', color: '#D97706' },
+  { id: 4, name: 'Bao đồng 2A', color: '#7C3AED' },
+  { id: 5, name: 'Bao đồng 2B', color: '#DC2626' },
+  { id: 6, name: 'Hiệp Sĩ', color: '#0891B2' },
+];
+
 export default function AdminPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [stats, setStats] = useState<any>(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [users, setUsers] = useState<any[]>([]);
-  const [teams, setTeams] = useState<any[]>([]);
+  const [teams, setTeams] = useState<any[]>(DEFAULT_TEAMS);
   const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [resetting, setResetting] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   // Search & Filter state
   const [searchQuery, setSearchQuery] = useState('');
@@ -45,38 +56,56 @@ export default function AdminPage() {
 
   // Edit form fields
   const [editDisplayName, setEditDisplayName] = useState('');
-  const [editTeamId, setEditTeamId] = useState('');
+  const [editTeamId, setEditTeamId] = useState('1');
   const [editRole, setEditRole] = useState('CHILD');
 
   // Load data
   const refreshData = async () => {
+    setRefreshing(true);
     try {
       const [s, u, t] = await Promise.all([
-        fetch('/api/admin/stats', { cache: 'no-store' }).then(r => r.json()),
-        fetch('/api/admin/users', { cache: 'no-store' }).then(r => r.json()),
-        fetch('/api/admin/tasks', { cache: 'no-store' }).then(r => r.json()),
+        fetch('/api/admin/stats', { cache: 'no-store' }).then(r => r.json()).catch(() => null),
+        fetch('/api/admin/users', { cache: 'no-store' }).then(r => r.json()).catch(() => null),
+        fetch('/api/admin/tasks', { cache: 'no-store' }).then(r => r.json()).catch(() => null),
       ]);
-      setStats(s);
-      setUsers(u.users || []);
-      setTeams(u.teams || []);
-      setTasks(t.tasks || []);
-    } catch (err) {
+
+      if (u?.code === 'UNAUTHORIZED' || u?.error === 'Unauthorized') {
+        alert('⚠️ Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+        router.push('/login');
+        return;
+      }
+
+      if (u?.error) {
+        setLoadError(u.error);
+      } else {
+        setLoadError(null);
+      }
+
+      if (s) setStats(s);
+      if (Array.isArray(u?.users)) setUsers(u.users);
+      if (Array.isArray(u?.teams) && u.teams.length > 0) setTeams(u.teams);
+      if (Array.isArray(t?.tasks)) setTasks(t.tasks);
+    } catch (err: any) {
       console.error('Lỗi khi tải dữ liệu admin:', err);
+      setLoadError(err.message || 'Lỗi kết nối');
+    } finally {
+      setRefreshing(false);
     }
   };
 
   useEffect(() => {
-    if (status === 'unauthenticated') { router.push('/login'); return; }
-    if (status === 'authenticated' && !['ADMIN', 'LEADER'].includes(session?.user?.role || '')) {
-      router.push('/dashboard');
+    if (status === 'unauthenticated') {
+      router.push('/login');
+      return;
     }
-  }, [status, session, router]);
-
-  useEffect(() => {
-    if (session && ['ADMIN', 'LEADER'].includes(session.user.role)) {
+    if (status === 'authenticated') {
+      if (!['ADMIN', 'LEADER'].includes(session?.user?.role || '')) {
+        router.push('/dashboard');
+        return;
+      }
       refreshData().finally(() => setLoading(false));
     }
-  }, [session]);
+  }, [status, session, router]);
 
   // Handle auto username when typing new name
   const handleNameChange = (name: string) => {
@@ -420,28 +449,85 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setShowAddModal(true)}
-                style={{
-                  padding: '10px 18px',
-                  borderRadius: 10,
-                  background: 'linear-gradient(135deg, #2563EB, #1D4ED8)',
-                  color: 'white',
-                  border: 'none',
-                  fontWeight: 700,
-                  fontSize: 13.5,
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  boxShadow: '0 4px 12px rgba(37,99,235,0.25)',
-                  fontFamily: 'inherit',
-                }}
-              >
-                <span>➕</span> Thêm thành viên mới
-              </button>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                <button
+                  type="button"
+                  disabled={refreshing}
+                  onClick={() => refreshData()}
+                  style={{
+                    padding: '10px 16px',
+                    borderRadius: 10,
+                    border: '1.5px solid #CBD5E1',
+                    background: 'white',
+                    color: '#334155',
+                    fontWeight: 700,
+                    fontSize: 13.5,
+                    cursor: refreshing ? 'not-allowed' : 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    fontFamily: 'inherit',
+                  }}
+                >
+                  <span>{refreshing ? '⏳' : '🔄'}</span> {refreshing ? 'Đang tải...' : 'Tải lại danh sách'}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(true)}
+                  style={{
+                    padding: '10px 18px',
+                    borderRadius: 10,
+                    background: 'linear-gradient(135deg, #2563EB, #1D4ED8)',
+                    color: 'white',
+                    border: 'none',
+                    fontWeight: 700,
+                    fontSize: 13.5,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    boxShadow: '0 4px 12px rgba(37,99,235,0.25)',
+                    fontFamily: 'inherit',
+                  }}
+                >
+                  <span>➕</span> Thêm thành viên mới
+                </button>
+              </div>
             </div>
+
+            {loadError && (
+              <div style={{
+                background: '#FEF2F2',
+                border: '1px solid #FCA5A5',
+                color: '#991B1B',
+                borderRadius: 12,
+                padding: '12px 16px',
+                marginBottom: 16,
+                fontSize: 13.5,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}>
+                <span>⚠️ Lỗi khi tải danh sách: {loadError}</span>
+                <button
+                  type="button"
+                  onClick={() => refreshData()}
+                  style={{
+                    padding: '6px 12px',
+                    borderRadius: 8,
+                    background: '#DC2626',
+                    color: 'white',
+                    border: 'none',
+                    fontSize: 12,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Thử lại
+                </button>
+              </div>
+            )}
 
             {/* Filter toolbar */}
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 20, padding: 14, background: '#F8FAFC', borderRadius: 14, border: '1px solid #E2E8F0' }}>

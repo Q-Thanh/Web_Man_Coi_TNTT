@@ -61,24 +61,16 @@ export async function POST(req: NextRequest) {
   const chuoiToday = Math.floor(newSmallToday / 50);
 
   // Quy tắc tính điểm:
-  // - Ít hơn 3 chuỗi (< 150 kinh): 0 điểm
-  // - Đủ 3 chuỗi (>= 150 kinh): 20 điểm
-  // - Mỗi chuỗi tăng thêm từ chuỗi thứ 4 trở đi: +5 điểm mỗi chuỗi (ví dụ: 4 chuỗi = 25 điểm, 5 chuỗi = 30 điểm)
-  let targetPointsToday = 0;
-  if (chuoiToday >= 3) {
-    targetPointsToday = 20 + (chuoiToday - 3) * 5;
+  // 1. Mỗi kinh đọc được cộng ngay 1 điểm (cá nhân và lớp)
+  const basePoints = beadsToAdd * 1;
+
+  // 2. Nếu ngày đó hoàn thành được 3 chuỗi (150 kinh) sẽ được thưởng thêm 20 điểm thi đua
+  let bonusPoints = 0;
+  if (prevSmallToday < 150 && newSmallToday >= 150) {
+    bonusPoints = 20;
   }
 
-  // Số điểm đã được ghi nhận hôm nay
-  const awardedRow = await db.get(`
-    SELECT COALESCE(SUM(points_earned), 0) as total
-    FROM task_completions
-    WHERE user_id = ?
-      AND date(completed_at, '+7 hours') = date('now', '+7 hours')
-  `, userId) as { total: number } | null;
-
-  const alreadyAwardedToday = awardedRow?.total || 0;
-  const pointsToAward = Math.max(0, targetPointsToday - alreadyAwardedToday);
+  const pointsToAward = basePoints + bonusPoints;
 
   // 1. Record completion with calculated points_earned
   const completion = await db.run(`
@@ -88,7 +80,7 @@ export async function POST(req: NextRequest) {
 
   const completionId = completion.lastInsertRowid as number;
 
-  // 2. Award points to user and team only when pointsToAward > 0
+  // 2. Award points to user and team
   const userRow = await db.get('SELECT team_id FROM users WHERE id = ?', userId) as any;
   if (pointsToAward > 0) {
     if (userRow?.team_id) {
@@ -102,17 +94,12 @@ export async function POST(req: NextRequest) {
       pointsToAward, userId
     );
 
-    // Thông báo chúc mừng đạt mốc 3 chuỗi hoặc chuỗi thưởng thêm
-    if (chuoiToday === 3 && alreadyAwardedToday === 0) {
+    // Thông báo chúc mừng khi đạt mốc thưởng 3 chuỗi
+    if (bonusPoints > 0) {
       await db.run(`
         INSERT INTO notifications (user_id, message, notif_type)
         VALUES (?, ?, 'milestone')
-      `, userId, '🎉 Chúc mừng! Bạn đã hoàn thành đủ 3 chuỗi Mân Côi hôm nay (150 kinh) và được cộng 20 điểm thi đua!');
-    } else if (chuoiToday > 3) {
-      await db.run(`
-        INSERT INTO notifications (user_id, message, notif_type)
-        VALUES (?, ?, 'milestone')
-      `, userId, `⭐ Tuyệt vời! Bạn hoàn thành chuỗi thứ ${chuoiToday} hôm nay và nhận thêm +${pointsToAward} điểm thưởng!`);
+      `, userId, '🎉 Chúc mừng! Bạn đã hoàn thành đủ 3 chuỗi Mân Côi hôm nay (150 kinh) và nhận thêm +20 điểm thưởng thi đua cho lớp!');
     }
   }
 
@@ -291,9 +278,9 @@ export async function POST(req: NextRequest) {
     beadType,
     beadsAdded: beadsToAdd,
     pointsAwarded: pointsToAward,
+    bonusPoints,
     todaySmallBeads: newSmallToday,
     todayChuoi: chuoiToday,
-    targetPointsToday,
     smallBeads: totalSmall,
     largeBeads: totalLarge,
     totalBeads: newTotalBeads,

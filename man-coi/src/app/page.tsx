@@ -55,7 +55,7 @@ export default function LandingPage() {
             </div>
             <div className={styles.heroStatDivider} />
             <div className={styles.heroStat}>
-              <strong>6</strong>
+              <strong>8</strong>
               <span>lớp thi đua</span>
             </div>
             <div className={styles.heroStatDivider} />
@@ -132,7 +132,7 @@ export default function LandingPage() {
       {/* Teams */}
       <section className={styles.teams}>
         <div className={styles.container}>
-          <h2 className={styles.sectionTitle}>6 Lớp Thi Đua</h2>
+          <h2 className={styles.sectionTitle}>8 Lớp Thi Đua</h2>
           <div className={styles.teamsGrid}>
             {[
               { name: 'Bao đồng 1A', color: '#2563EB', icon: '🕊️' },
@@ -141,6 +141,8 @@ export default function LandingPage() {
               { name: 'Bao đồng 2A', color: '#7C3AED', icon: '💜' },
               { name: 'Bao đồng 2B', color: '#DC2626', icon: '🌹' },
               { name: 'Hiệp Sĩ', color: '#0891B2', icon: '⚔️' },
+              { name: 'Dự trưởng 1', color: '#EA580C', icon: '🌟' },
+              { name: 'Dự trưởng 2', color: '#0D9488', icon: '🕯️' },
             ].map(team => (
               <div key={team.name} className={styles.teamChip} style={{ borderColor: team.color }}>
                 <span>{team.icon}</span>

@@ -265,13 +265,13 @@ export default function DashboardPage() {
                     background: (dashData?.todayChuoi || 0) >= 3 ? '#16A34A' : '#F59E0B',
                     color: 'white',
                   }}>
-                    {(dashData?.todayChuoi || 0) >= 3 ? `✅ Đã đạt (+${dashData?.todayPoints || 20}đ)` : `${dashData?.todayChuoi || 0} / 3 chuỗi`}
+                    {(dashData?.todayChuoi || 0) >= 3 ? '✅ Đã đạt (+20đ thưởng)' : `${dashData?.todayChuoi || 0} / 3 chuỗi`}
                   </span>
                 </div>
                 <div style={{ fontSize: 12.5, color: (dashData?.todayChuoi || 0) >= 3 ? '#14532D' : '#78350F', lineHeight: 1.45 }}>
                   {(dashData?.todayChuoi || 0) >= 3
-                    ? `🎉 Chúc mừng con đã hoàn thành ${dashData?.todayChuoi} chuỗi hôm nay (+${dashData?.todayPoints} điểm)! Mỗi chuỗi tiếp theo hôm nay sẽ được thưởng thêm +5 điểm.`
-                    : `Hôm nay con đã đọc ${dashData?.todaySmallBeads || 0} kinh Kính Mừng (${dashData?.todayChuoi || 0}/3 chuỗi). Cần hoàn thành đủ 3 chuỗi (150 kinh) để nhận 20 điểm thi đua hôm nay!`}
+                    ? `🎉 Chúc mừng con đã hoàn thành ${dashData?.todayChuoi} chuỗi hôm nay! Con đã tích lũy ${dashData?.todayPoints || 0} điểm (gồm 1 điểm/kinh và +20 điểm thưởng hoàn thành 3 chuỗi cho lớp).`
+                    : `Mỗi kinh con đọc được cộng 1 điểm. Hôm nay con đã đọc ${dashData?.todaySmallBeads || 0} kinh Kính Mừng (${dashData?.todayChuoi || 0}/3 chuỗi). Hoàn thành đủ 3 chuỗi (150 kinh) để nhận thêm 20 điểm thưởng thi đua cho lớp!`}
                 </div>
               </div>
 

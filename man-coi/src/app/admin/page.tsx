@@ -22,6 +22,8 @@ const DEFAULT_TEAMS = [
   { id: 4, name: 'Bao đồng 2A', color: '#7C3AED' },
   { id: 5, name: 'Bao đồng 2B', color: '#DC2626' },
   { id: 6, name: 'Hiệp Sĩ', color: '#0891B2' },
+  { id: 7, name: 'Dự trưởng 1', color: '#EA580C' },
+  { id: 8, name: 'Dự trưởng 2', color: '#0D9488' },
 ];
 
 export default function AdminPage() {

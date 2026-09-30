@@ -26,6 +26,7 @@ interface DashboardData {
   litCount: number;
   smallBeads: number;
   largeBeads: number;
+  totalLargeBeads?: number;
   streak: { current_streak: number; longest_streak: number };
   completedTodayIds: number[];
   todayBeads: number;
@@ -210,6 +211,7 @@ export default function DashboardPage() {
                 totalBeads={55}
                 smallBeads={smallBeads}
                 largeBeads={largeBeads}
+                teamName={user.teamName}
                 size="lg"
               />
             </div>
@@ -225,19 +227,19 @@ export default function DashboardPage() {
                     <span className={styles.pointsFloat}>+{beadAnimation.count}</span>
                   )}
                 </div>
-                <div className={styles.statLabel}>Hạt nhỏ<br/><small>(Kinh Kính Mừng)</small></div>
+                <div className={styles.statLabel}>{user.teamName ? 'Hạt nhỏ của lớp' : 'Hạt nhỏ'}<br/><small>(Kinh Kính Mừng)</small></div>
               </div>
 
               {/* Large beads count */}
               <div className={styles.statCard}>
                 <div className={styles.statIcon}>🙏</div>
                 <div className={styles.statValue} style={{ color: '#7C3AED' }}>
-                  {largeBeads}
+                  {dashData?.totalLargeBeads || largeBeads}
                   {beadAnimation.show && beadAnimation.type === 'large' && (
                     <span className={styles.pointsFloat}>+{beadAnimation.count}</span>
                   )}
                 </div>
-                <div className={styles.statLabel}>Hạt to<br/><small>(Kinh Lạy Cha)</small></div>
+                <div className={styles.statLabel}>{user.teamName ? 'Hạt to của lớp' : 'Hạt to'}<br/><small>(Kinh Lạy Cha)</small></div>
               </div>
 
               {/* Streak */}
@@ -253,7 +255,7 @@ export default function DashboardPage() {
               <div className={styles.statCard}>
                 <div className={styles.statIcon}>🌟</div>
                 <div className={styles.statValue} style={{ color: '#2563EB' }}>+{todayBeads}</div>
-                <div className={styles.statLabel}>Hạt hôm nay</div>
+                <div className={styles.statLabel}>{user.teamName ? 'Hạt của lớp hôm nay' : 'Hạt hôm nay'}</div>
               </div>
 
               {/* Daily Mission Target (3 Chuỗi -> 20 Điểm) */}
@@ -267,20 +269,20 @@ export default function DashboardPage() {
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                   <span style={{ fontSize: 13.5, fontWeight: 800, color: (dashData?.todayChuoi || 0) >= 3 ? '#166534' : '#92400E' }}>
-                    🎯 Mục tiêu ngày: 3 Chuỗi Mân Côi
+                    🎯 Mục tiêu ngày của lớp: 3 Chuỗi Mân Côi
                   </span>
                   <span style={{
                     fontSize: 12, fontWeight: 800, padding: '3px 10px', borderRadius: 9999,
                     background: (dashData?.todayChuoi || 0) >= 3 ? '#16A34A' : '#F59E0B',
                     color: 'white',
                   }}>
-                    {(dashData?.todayChuoi || 0) >= 3 ? '✅ Đã đạt (+20đ thưởng)' : `${dashData?.todayChuoi || 0} / 3 chuỗi`}
+                    {(dashData?.todayChuoi || 0) >= 3 ? '✅ Lớp đã đạt (+20đ thưởng)' : `${dashData?.todayChuoi || 0} / 3 chuỗi`}
                   </span>
                 </div>
                 <div style={{ fontSize: 12.5, color: (dashData?.todayChuoi || 0) >= 3 ? '#14532D' : '#78350F', lineHeight: 1.45 }}>
                   {(dashData?.todayChuoi || 0) >= 3
-                    ? `🎉 Chúc mừng con đã hoàn thành ${dashData?.todayChuoi} chuỗi hôm nay! Con đã tích lũy ${dashData?.todayPoints || 0} điểm (gồm 1 điểm/kinh và +20 điểm thưởng hoàn thành 3 chuỗi cho lớp).`
-                    : `Mỗi kinh con đọc được cộng 1 điểm. Hôm nay con đã đọc ${dashData?.todaySmallBeads || 0} kinh Kính Mừng (${dashData?.todayChuoi || 0}/3 chuỗi). Hoàn thành đủ 3 chuỗi (150 kinh) để nhận thêm 20 điểm thưởng thi đua cho lớp!`}
+                    ? `🎉 Chúc mừng lớp ${user.teamName || ''} đã hoàn thành ${dashData?.todayChuoi} chuỗi hôm nay! Cả lớp đã cùng nhau tích lũy ${dashData?.todayPoints || 0} điểm thi đua (gồm điểm các kinh và +20 điểm thưởng hoàn thành 3 chuỗi).`
+                    : `Mỗi kinh đọc được cộng 1 điểm cho lớp. Hôm nay lớp ${user.teamName || ''} đã đọc ${dashData?.todaySmallBeads || 0} kinh Kính Mừng (${dashData?.todayChuoi || 0}/3 chuỗi). Hoàn thành đủ 3 chuỗi (150 kinh) để nhận thêm 20 điểm thưởng thi đua cho lớp!`}
                 </div>
               </div>
 
@@ -307,14 +309,14 @@ export default function DashboardPage() {
               <div className={styles.motivationBox}>
                 <p className={styles.motivationText}>
                   {litCount === 0
-                    ? '🌱 Hãy bắt đầu hành trình của con hôm nay!'
+                    ? `🌱 Hãy cùng lớp ${user.teamName || ''} bắt đầu hành trình hôm nay!`
                     : litCount < 10
-                    ? `✨ Con đã thắp được ${litCount} hạt đầu tiên!`
+                    ? `✨ Lớp ${user.teamName || ''} đã thắp được ${litCount} hạt đầu tiên trong vòng này!`
                     : litCount < 25
-                    ? `💪 Cố thêm ${25 - litCount} hạt nữa đến nửa chặng đường!`
+                    ? `💪 Cố thêm ${25 - litCount} hạt nữa để lớp đạt nửa chặng đường vòng này!`
                     : litCount < 50
-                    ? `🔥 Chỉ còn ${50 - litCount} hạt nữa để đạt 50 hạt!`
-                    : `🎉 Tuyệt vời! Con đã thắp được ${litCount} hạt rồi!`}
+                    ? `🔥 Chỉ còn ${50 - litCount} hạt nữa để lớp hoàn thành vòng này!`
+                    : `🎉 Tuyệt vời! Lớp ${user.teamName || ''} đã hoàn thành chuỗi của vòng này rồi!`}
                 </p>
               </div>
             </div>

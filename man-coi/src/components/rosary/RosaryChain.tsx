@@ -17,6 +17,7 @@ export interface RosaryChainProps {
   totalBeads?: number;
   smallBeads?: number;
   largeBeads?: number;
+  teamName?: string;
   onBeadClick?: (position: number) => void;
   size?: 'sm' | 'md' | 'lg';
   showLabels?: boolean;
@@ -195,6 +196,7 @@ export default function RosaryChain({
   totalBeads = 55,
   smallBeads,
   largeBeads,
+  teamName,
   onBeadClick,
   size = 'lg',
   showLabels = true,
@@ -231,10 +233,10 @@ export default function RosaryChain({
     [width, height, mysteryInfo]
   );
 
-  // Map of lit bead positions
+  // Map of lit bead positions directly from backend
   const litMap = useMemo(() => {
-    const map = new Map<number, string>();
-    beads.forEach(b => { if (b.isLit) map.set(b.position, b.type || 'small'); });
+    const map = new Map<number, boolean>();
+    beads.forEach(b => { map.set(b.position, Boolean(b.isLit)); });
     return map;
   }, [beads]);
 
@@ -282,10 +284,10 @@ export default function RosaryChain({
           <span className={styles.rosaryIconBadge}>{mysteryInfo.mystery.icon}</span>
           <div>
             <div className={styles.progressSummaryTitle}>
-              {mysteryInfo.mystery.name} (Vòng {mysteryInfo.roundNumber})
+              {teamName ? `Lớp ${teamName} • ${mysteryInfo.mystery.name} (Vòng ${mysteryInfo.roundNumber})` : `${mysteryInfo.mystery.name} (Vòng ${mysteryInfo.roundNumber})`}
             </div>
             <div className={styles.progressSummarySub}>
-              Vòng này: <strong>{mysteryInfo.beadsInRound}</strong>/50 hạt nhỏ • Tổng tích lũy: <strong>{currentTotalSmall}</strong> hạt
+              Vòng này: <strong>{mysteryInfo.beadsInRound}</strong>/50 hạt nhỏ • {teamName ? `Lớp tích lũy: ` : 'Tổng tích lũy: '}<strong>{currentTotalSmall}</strong> hạt
             </div>
           </div>
         </div>
@@ -534,9 +536,11 @@ export default function RosaryChain({
           {/* Loop Beads (50 hạt nhỏ xanh dương + 4 hạt lớn vàng) */}
           {geo.loopBeads.map((bead) => {
             const isLarge = bead.type === 'large';
-            const isLit = isLarge
-              ? (bead.decadeIndex ? bead.decadeIndex <= litLargeCount : false)
-              : (bead.position <= litSmallCount);
+            const isLit = litMap.has(bead.position)
+              ? Boolean(litMap.get(bead.position))
+              : (isLarge
+                  ? (bead.decadeIndex ? bead.decadeIndex <= litLargeCount : false)
+                  : bead.position <= litSmallCount);
             const isNew = newSet.has(bead.position);
             const radius = isLarge ? 12 : 7.5;
             const isSelected = selectedBead?.id === bead.id;
@@ -600,7 +604,7 @@ export default function RosaryChain({
           {geo.pendantBeads.map((bead) => {
             const isMedallion = bead.type === 'medallion';
             const isLarge = bead.type === 'large';
-            const isLit = litMap.has(bead.position);
+            const isLit = Boolean(litMap.get(bead.position));
             const isNew = newSet.has(bead.position);
             const radius = isMedallion ? 16 : isLarge ? 12 : 8;
             const isSelected = selectedBead?.id === bead.id;
@@ -693,7 +697,7 @@ export default function RosaryChain({
 
           {/* ─── 4. CRUCIFIX (CÂY THÁNH GIÁ) ─── */}
           {(() => {
-            const isCrossLit = litMap.has(0);
+            const isCrossLit = Boolean(litMap.get(0));
             return (
               <g
                 className={styles.crucifixGroup}

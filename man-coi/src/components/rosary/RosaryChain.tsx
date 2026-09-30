@@ -290,66 +290,99 @@ export default function RosaryChain({
         </div>
       </div>
 
-      {/* ─── THẺ MẦU NHIỆM & SUY NIỆM CHỤC KINH ─── */}
+      {/* ─── THẺ MẦU NHIỆM & SUY NIỆM CHỤC KINH (NẰM PHÍA TRÊN CHUỖI MÂN CÔI) ─── */}
       <div className={styles.mysteryCardWrapper}>
         <div className={styles.mysteryCard} style={{ borderColor: mysteryInfo.mystery.color }}>
-          {/* Header */}
+          {/* Header: Season & Round Badge */}
           <div className={styles.mysteryCardHeader} style={{ background: mysteryInfo.mystery.bgGradient }}>
             <div className={styles.mysterySeasonTag}>
               <span className={styles.mysteryIcon}>{mysteryInfo.mystery.icon}</span>
-              <span>{mysteryInfo.mystery.name}</span>
+              <span className={styles.mysteryName}>{mysteryInfo.mystery.name}</span>
             </div>
-            <div className={styles.mysteryRoundBadge}>
-              Vòng {mysteryInfo.roundNumber} • Chục {displayedDecadeNumber}/5
-            </div>
+            <span className={styles.mysteryRoundBadge} style={{ background: mysteryInfo.mystery.badgeBg }}>
+              VÒNG {mysteryInfo.roundNumber}
+            </span>
           </div>
 
-          {/* Decade tabs */}
-          <div className={styles.decadeTabs}>
-            {[1, 2, 3, 4, 5].map((dNum) => {
-              const isCurrent = dNum === mysteryInfo.currentDecadeNumber;
-              const isSelectedTab = dNum === displayedDecadeNumber;
-              const isCompleted = dNum < mysteryInfo.currentDecadeNumber;
-              return (
-                <button
-                  key={dNum}
-                  type="button"
-                  className={`${styles.decadeTab} ${isSelectedTab ? styles.decadeTabActive : ''} ${isCompleted ? styles.decadeTabCompleted : ''}`}
-                  onClick={() => setSelectedDecadeNumber(dNum)}
-                  title={`Chục thứ ${dNum}: ${mysteryInfo.mystery.decades[dNum - 1].title}`}
-                >
-                  <span className={styles.decadeTabNum}>{dNum}</span>
-                  {isCompleted && <span className={styles.decadeTabCheck}>✓</span>}
-                  {isCurrent && !isCompleted && <span className={styles.decadeTabDot}>•</span>}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Active Decade Content */}
-          <div className={styles.mysteryContent}>
-            <div className={styles.decadeHeader}>
-              <div className={styles.decadeTitleRow}>
-                <span className={styles.decadeBadge}>
-                  {displayedDecade.title}
-                  {isActiveDecade && <span className={styles.activePill}>Đang đọc</span>}
-                </span>
-                <span className={styles.decadeFruit}>
-                  Ơn xin: <strong>{displayedDecade.prayerFruit}</strong>
-                </span>
+          {/* Body: Current Decade & Meditation */}
+          <div className={styles.mysteryBody}>
+            <div className={styles.mysteryDecadeTitleRow}>
+              <div className={styles.decadeBadge} style={{ color: mysteryInfo.mystery.color }}>
+                Chục {displayedDecade.title} (Hạt {(displayedDecadeNumber - 1) * 10 + 1} – {displayedDecadeNumber * 10})
               </div>
+              {isActiveDecade ? (
+                <span className={styles.activePulseBadge}>Đang đọc</span>
+              ) : (
+                <button
+                  type="button"
+                  className={styles.backToActiveBtn}
+                  onClick={() => setSelectedDecadeNumber(null)}
+                  title="Quay lại chục đang đọc theo tiến độ chuỗi"
+                >
+                  ↩ Về chục đang đọc
+                </button>
+              )}
             </div>
 
-            <p className={styles.decadeText}>
-              {displayedDecade.text}
-            </p>
+            {/* Meditation Text from User */}
+            <div className={styles.meditationText}>
+              &ldquo;{displayedDecade.text}&rdquo;
+            </div>
 
-            {/* Fatima prayer */}
-            <div className={styles.fatimaBox}>
-              <span className={styles.fatimaTag}>Lời nguyện Fatima:</span>
-              <span className={styles.fatimaText}>
-                «Lạy Chúa Giêsu, xin tha tội cho chúng con, xin cứu chúng con khỏi sa hỏa ngục, xin đem các linh hồn lên thiên đàng, nhất là những linh hồn cần đến lòng Chúa thương xót hơn.»
-              </span>
+            {/* Lời nguyện Fatima dưới mỗi chục */}
+            <div className={styles.fatimaPrayerText}>
+              <span className={styles.fatimaTag}>✝ Lời nguyện Fatima:</span>
+              &ldquo;Lạy Chúa Giêsu, xin tha tội cho chúng con, xin cứu chúng con khỏi sa hỏa ngục, xin đưa các linh hồn lên thiên đàng, nhất là những linh hồn cần đến lòng Chúa thương xót hơn. Amen.&rdquo;
+            </div>
+
+            {/* Decade Progress */}
+            <div className={styles.decadeProgressWrap}>
+              <div className={styles.decadeProgressText}>
+                <span>Tiến độ chục này:</span>
+                <strong>{isActiveDecade ? mysteryInfo.decadeProgress : (displayedDecadeNumber < mysteryInfo.currentDecadeNumber ? 10 : 0)}/10 hạt nhỏ</strong>
+              </div>
+              <div className={styles.decadeProgressBar}>
+                <div
+                  className={styles.decadeProgressFill}
+                  style={{
+                    width: `${((isActiveDecade ? mysteryInfo.decadeProgress : (displayedDecadeNumber < mysteryInfo.currentDecadeNumber ? 10 : 0)) / 10) * 100}%`,
+                    backgroundColor: mysteryInfo.mystery.color,
+                  }}
+                />
+              </div>
+              {isActiveDecade && mysteryInfo.decadeProgress === 10 && (
+                <div className={styles.decadeCompleteNote}>
+                  ✨ Đã xong 10 hạt nhỏ! Đọc 1 Kinh Lạy Cha (Hạt to) để qua {mysteryInfo.currentDecadeNumber < 5 ? `Chục ${mysteryInfo.mystery.decades[mysteryInfo.currentDecadeNumber]?.title}` : 'Vòng Mầu Nhiệm mới'}!
+                </div>
+              )}
+            </div>
+
+            {/* 5 Decade Navigation Buttons */}
+            <div className={styles.decadeNavList}>
+              {mysteryInfo.mystery.decades.map((dec) => {
+                const isThisActive = dec.decadeNumber === mysteryInfo.currentDecadeNumber;
+                const isSelected = dec.decadeNumber === displayedDecadeNumber;
+                const isPassed = dec.decadeNumber < mysteryInfo.currentDecadeNumber;
+
+                return (
+                  <button
+                    key={dec.decadeNumber}
+                    type="button"
+                    className={`${styles.decadeNavBtn} ${isSelected ? styles.decadeNavBtnSelected : ''} ${isThisActive ? styles.decadeNavBtnActive : ''}`}
+                    onClick={() => {
+                      if (dec.decadeNumber === displayedDecadeNumber) {
+                        setSelectedDecadeNumber(null);
+                      } else {
+                        setSelectedDecadeNumber(dec.decadeNumber);
+                      }
+                    }}
+                    title={dec.text}
+                  >
+                    <span>{dec.decadeNumber}</span>
+                    {isPassed && <span className={styles.checkDone}>✓</span>}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>

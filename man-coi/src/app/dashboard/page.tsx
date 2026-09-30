@@ -38,6 +38,7 @@ interface Task {
   id: number;
   title: string;
   description: string;
+  points?: number;
   bead_progress: number;
   bead_type: string;
   task_type: string;
@@ -167,8 +168,8 @@ export default function DashboardPage() {
   if (!dashData) return null;
 
   const { user, beads, litCount, smallBeads, largeBeads, streak, todayBeads } = dashData;
-  const kinMungTasks = tasks.filter(t => (t.bead_type || 'small') === 'small');
-  const layChaTasks = tasks.filter(t => t.bead_type === 'large');
+  const guideTasks = tasks.filter(t => /^\d+\./.test(t.title));
+  const freeTasks = tasks.filter(t => !/^\d+\./.test(t.title));
 
   const rosaryBeads = beads.map(b => ({
     ...b,
@@ -314,11 +315,28 @@ export default function DashboardPage() {
 
         {/* ─── TASKS ─── */}
         <section className={styles.tasksSection}>
-          {/* Kinh Kính Mừng */}
-          <h2 className={styles.sectionTitle}>🌹 Kinh Kính Mừng <span style={{ fontSize: '0.9rem', color: '#6B7280' }}>(mỗi lần = 1 hạt nhỏ)</span></h2>
-          <p className={styles.sectionSub}>Mỗi lần đọc kinh sẽ thắp sáng thêm hạt nhỏ trên chuỗi Mân Côi</p>
+          {/* Hướng dẫn 10 bước lần hạt theo ảnh */}
+          <div style={{
+            background: 'linear-gradient(135deg, #EFF6FF 0%, #F0FDF4 100%)',
+            border: '1.5px solid #BFDBFE',
+            borderRadius: 20,
+            padding: '20px 24px',
+            marginBottom: '28px',
+            boxShadow: '0 4px 16px rgba(37, 99, 235, 0.06)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+              <span style={{ fontSize: '24px' }}>📿</span>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#1E3A8A', margin: 0 }}>
+                10 Bước Lần Hạt Mân Côi (Theo Thứ Tự Hướng Dẫn)
+              </h2>
+            </div>
+            <p style={{ fontSize: '13.5px', color: '#475569', margin: 0, lineHeight: 1.5 }}>
+              Lần lượt bấm <strong>Hoàn thành</strong> từng nhiệm vụ bên dưới để thắp sáng các hạt trên chuỗi theo đúng thứ tự đánh số <strong>(1) đến (10)</strong> như trong hình hướng dẫn!
+            </p>
+          </div>
+
           <div className={styles.taskList}>
-            {kinMungTasks.map(task => (
+            {guideTasks.map(task => (
               <TaskCard
                 key={task.id}
                 task={task}
@@ -328,19 +346,25 @@ export default function DashboardPage() {
             ))}
           </div>
 
-          {/* Kinh Lạy Cha */}
-          <h2 className={styles.sectionTitle} style={{ marginTop: '32px' }}>🙏 Kinh Lạy Cha <span style={{ fontSize: '0.9rem', color: '#6B7280' }}>(mỗi lần = 1 hạt to)</span></h2>
-          <p className={styles.sectionSub}>Kinh Lạy Cha thắp sáng hạt to đặc biệt trên chuỗi Mân Côi</p>
-          <div className={styles.taskList}>
-            {layChaTasks.map(task => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                isCompleting={completingTaskId === task.id}
-                onComplete={() => handleCompleteTask(task)}
-              />
-            ))}
-          </div>
+          {/* Cầu nguyện thêm tự do */}
+          {freeTasks.length > 0 && (
+            <>
+              <h2 className={styles.sectionTitle} style={{ marginTop: '36px' }}>
+                🕊️ Cầu Nguyện Thêm <span style={{ fontSize: '0.9rem', color: '#6B7280' }}>(Đọc kinh tự do)</span>
+              </h2>
+              <p className={styles.sectionSub}>Dâng thêm những đoá hoa hồng kinh nguyện lên Mẹ bất kỳ lúc nào</p>
+              <div className={styles.taskList}>
+                {freeTasks.map(task => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    isCompleting={completingTaskId === task.id}
+                    onComplete={() => handleCompleteTask(task)}
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </section>
       </main>
     </div>
@@ -357,24 +381,57 @@ function TaskCard({
   isCompleting: boolean;
   onComplete: () => void;
 }) {
+  const match = task.title.match(/^(\d+)\.\s*(.*)/);
+  const stepNumber = match ? match[1] : null;
+  const cleanTitle = match ? match[2] : task.title;
+
   const isLarge = task.bead_type === 'large';
-  const bgColor = isLarge ? '#F5F3FF' : '#FFF1F2';
-  const beadEmoji = isLarge ? '🟤' : '⚪';
-  const beadLabel = isLarge ? 'hạt to' : 'hạt nhỏ';
+  const isCross = task.bead_type === 'cross';
+  const isMedallion = task.bead_type === 'medallion';
+
+  // Choose accent color for step badge
+  const stepColor = stepNumber === '1' || stepNumber === '10' ? '#78350F'
+    : stepNumber === '2' ? '#2563EB'
+    : stepNumber === '3' ? '#DC2626'
+    : stepNumber === '4' ? '#D97706'
+    : stepNumber === '5' ? '#D97706'
+    : stepNumber === '6' ? '#CA8A04'
+    : stepNumber === '7' ? '#B45309'
+    : stepNumber === '8' ? '#16A34A'
+    : stepNumber === '9' ? '#B45309'
+    : '#2563EB';
+
+  const bgColor = isCross ? '#FFFBEB' : isMedallion ? '#FEF3C7' : isLarge ? '#EFF6FF' : '#FFF1F2';
   const doneCount = task.completionsToday || 0;
 
   return (
-    <div
-      className={`${styles.taskCard} ${isCompleting ? styles.taskCompleting : ''}`}
-    >
-      <div className={styles.taskIcon} style={{ background: bgColor }}>
+    <div className={`${styles.taskCard} ${isCompleting ? styles.taskCompleting : ''}`}>
+      <div className={styles.taskIcon} style={{ background: bgColor, position: 'relative' }}>
         {task.icon}
-        {/* Badge showing how many times completed today */}
+        {stepNumber && (
+          <span style={{
+            position: 'absolute',
+            bottom: '-4px', left: '-4px',
+            background: stepColor,
+            color: '#fff',
+            borderRadius: '999px',
+            fontSize: '11px',
+            fontWeight: 800,
+            width: '20px',
+            height: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 2px 4px rgba(0,0,0,.25)',
+          }}>
+            {stepNumber}
+          </span>
+        )}
         {doneCount > 0 && (
           <span style={{
             position: 'absolute',
             top: '-6px', right: '-6px',
-            background: isLarge ? '#7C3AED' : '#E11D48',
+            background: '#10B981',
             color: '#fff',
             borderRadius: '999px',
             fontSize: '11px',
@@ -393,26 +450,28 @@ function TaskCard({
       </div>
 
       <div className={styles.taskBody}>
-        <div className={styles.taskTitle}>{task.title}</div>
+        <div className={styles.taskTitle}>
+          {stepNumber && <span style={{ color: stepColor, fontWeight: 900, marginRight: 6 }}>Bước {stepNumber}:</span>}
+          {cleanTitle}
+        </div>
         <div className={styles.taskDesc}>{task.description}</div>
         <div className={styles.taskMeta}>
           <span className={styles.taskBeads}>
-            {beadEmoji} +{task.bead_progress} {beadLabel}/lần
+            {task.icon} +{task.bead_progress} {isCross ? 'Thánh Giá' : isMedallion ? 'Mề Đay' : isLarge ? 'hạt to' : 'hạt nhỏ'}
           </span>
           <span className={styles.taskType}>
-            {doneCount > 0 ? `Đã đọc ${doneCount} lần hôm nay` : (task.task_type === 'daily' ? 'Có thể đọc nhiều lần' : 'Đặc biệt')}
+            {doneCount > 0 ? `Đã hoàn thành ${doneCount} lần hôm nay` : 'Theo hướng dẫn'}
           </span>
         </div>
       </div>
 
       <div className={styles.taskRight}>
         <div className={styles.taskPoints}>
-          <span className={styles.taskPointsNum} style={{ color: isLarge ? '#7C3AED' : '#E11D48' }}>
-            +{task.bead_progress}
+          <span className={styles.taskPointsNum} style={{ color: stepColor }}>
+            +{task.points || task.bead_progress}
           </span>
-          <span className={styles.taskPointsLabel}>{beadLabel}</span>
+          <span className={styles.taskPointsLabel}>điểm thi đua</span>
         </div>
-        {/* Button always visible and tappable */}
         <button
           className={styles.completeBtn}
           onClick={onComplete}

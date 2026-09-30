@@ -12,12 +12,12 @@ export async function GET() {
   const userId = parseInt(session.user.id);
   const today = new Date().toISOString().split('T')[0];
 
-  // Get all active tasks – include bead_type
+  // Get all active tasks – ordered by id ASC (steps 1..10 in order)
   const tasks = await db.all(`
     SELECT id, title, description, points, bead_progress, bead_type, task_type, icon, reset_type
     FROM tasks
     WHERE is_active = 1
-    ORDER BY bead_type DESC, bead_progress ASC
+    ORDER BY id ASC
   `) as any[];
 
   // Count how many times each task was completed today

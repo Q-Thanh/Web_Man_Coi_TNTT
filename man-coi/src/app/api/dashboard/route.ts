@@ -61,33 +61,84 @@ export async function GET() {
   const beadsInRound = mysteryInfo.beadsInRound;
   const largeInRound = (largeBeads % 5 === 0 && largeBeads > 0) ? 5 : (largeBeads % 5);
 
+  // Get individually lit beads from rosary_beads table for this user
+  const userLitBeads = await db.all(
+    'SELECT bead_position, bead_type, lit_at FROM rosary_beads WHERE user_id = ?',
+    userId
+  ) as { bead_position: number; bead_type: string; lit_at: string }[];
+  const userLitMap = new Map<number, { bead_type: string; lit_at: string }>();
+  for (const b of userLitBeads) {
+    userLitMap.set(b.bead_position, b);
+  }
+
   // Total lit count on the chain for the current loop
   const totalLit = beadsInRound + largeInRound;
 
-  // Build the bead display array for RosaryChain:
-  // - Small beads: positions 1..50 on the loop (reflecting current round)
-  // - Large beads: positions 51..56 (51: Hạt lớn đầu tiên, 52-55: 4 hạt lớn giữa các chục, 56: Hạt lớn trước Mề Đay)
+  // Build the complete bead display array for RosaryChain:
+  // - Crucifix: position 0
+  // - Pendant beads: 51 (large 1), 101, 102, 103 (3 small), 56 (large 2), 57 (medallion)
+  // - Loop beads: 1..50 (small), 52..55 (4 large dividers)
   const beads: Array<{ position: number; type: string; isLit: boolean; litAt: string | null }> = [];
 
-  // Small bead slots (1-50)
+  // 1. Crucifix (pos 0)
+  beads.push({
+    position: 0,
+    type: 'cross',
+    isLit: userLitMap.has(0),
+    litAt: userLitMap.get(0)?.lit_at || null,
+  });
+
+  // 2. Pendant beads (51, 101, 102, 103, 56, 57)
+  beads.push({
+    position: 51,
+    type: 'large',
+    isLit: userLitMap.has(51) || largeBeads > 0,
+    litAt: userLitMap.get(51)?.lit_at || null,
+  });
+
+  const pendantSmall = [101, 102, 103];
+  pendantSmall.forEach((pos, idx) => {
+    beads.push({
+      position: pos,
+      type: 'small',
+      isLit: userLitMap.has(pos) || smallBeads > idx,
+      litAt: userLitMap.get(pos)?.lit_at || null,
+    });
+  });
+
+  beads.push({
+    position: 56,
+    type: 'large',
+    isLit: userLitMap.has(56) || largeBeads > 1,
+    litAt: userLitMap.get(56)?.lit_at || null,
+  });
+
+  beads.push({
+    position: 57,
+    type: 'medallion',
+    isLit: userLitMap.has(57) || (smallBeads >= 50 && largeBeads >= 5),
+    litAt: userLitMap.get(57)?.lit_at || null,
+  });
+
+  // 3. Loop small beads (1-50)
   for (let pos = 1; pos <= 50; pos++) {
     beads.push({
       position: pos,
       type: 'small',
-      isLit: pos <= beadsInRound,
-      litAt: null,
+      isLit: userLitMap.has(pos) || pos <= beadsInRound,
+      litAt: userLitMap.get(pos)?.lit_at || null,
     });
   }
 
-  // Large bead slots (51-56)
-  const largePositions = [51, 52, 53, 54, 55, 56];
-  for (let i = 0; i < largePositions.length; i++) {
-    const pos = largePositions[i];
+  // 4. Large divider beads on loop (52-55)
+  const largeLoopPositions = [52, 53, 54, 55];
+  for (let i = 0; i < largeLoopPositions.length; i++) {
+    const pos = largeLoopPositions[i];
     beads.push({
       position: pos,
       type: 'large',
-      isLit: i < largeInRound,
-      litAt: null,
+      isLit: userLitMap.has(pos) || (i + 1 <= largeInRound),
+      litAt: userLitMap.get(pos)?.lit_at || null,
     });
   }
 

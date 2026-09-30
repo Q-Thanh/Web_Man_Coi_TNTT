@@ -26,13 +26,12 @@ export interface RosaryChainProps {
 // Structure:
 // - Center: Blessed Virgin Mary (Đức Mẹ Ban Ơn) in an oval halo frame
 // - The Loop: 5 Decades (Chục 1..5) with 10 small beads each, separated by 4 large divider beads + 1 Center Medallion
-// - The Pendant (Tail): Medallion -> 1 Large bead -> 3 Small beads -> 1 Large bead -> Crucifix (Thánh Giá)
+// - The Pendant (Tail): Medallion -> 3 Small beads -> 1 Large bead -> Crucifix (Thánh Giá)
 
 interface BeadPos {
   id: string;
   position: number; // 1 to 55 for gamification tracking
   type: 'small' | 'large' | 'medallion' | 'cross';
-  color: 'yellow' | 'green' | 'blue' | 'red' | 'white' | 'gold';
   x: number;
   y: number;
   decadeIndex?: number;
@@ -42,27 +41,18 @@ interface BeadPos {
   meaning: string;
 }
 
-const DECADE_COLORS: Array<'yellow' | 'green' | 'blue' | 'red' | 'white'> = [
-  'yellow', // Chục 1: Vàng (Châu Á)
-  'green',  // Chục 2: Xanh lá (Châu Phi)
-  'blue',   // Chục 3: Xanh dương (Châu Đại Dương)
-  'red',    // Chục 4: Đỏ (Châu Mỹ)
-  'white',  // Chục 5: Trắng (Châu Âu)
-];
-
 function calculateRosaryGeometry(width: number, height: number, mysteryInfo?: MysteryProgressInfo) {
-  // Center Rosary horizontally with an elegant, tall vertical oval shape (elip đứng theo hình mẫu)
+  // Center Rosary horizontally with an elegant, tall vertical oval shape
   const cx = width / 2;
   const ovalCY = height * 0.36; // 274px
-  const rx = width * 0.36; // 180px on 500px width (thon gọn chiều ngang)
-  const ry = height * 0.315; // 240px on 760px height (dáng elip đứng, chừa chỗ cho chuỗi dọc)
+  const rx = width * 0.36; // 180px on 500px width
+  const ry = height * 0.315; // 240px on 760px height
 
   // Medallion at the bottom of the loop
   const medallionX = cx;
   const medallionY = ovalCY + ry; // 514px
 
   // The 5 decades around the ellipse
-  // Gap at bottom for the medallion: angle gap of ~0.26 radians each side
   const bottomGap = 0.28;
   const startAngle = Math.PI / 2 + bottomGap; // Bottom-left starting clockwise
   const endAngle = Math.PI / 2 - bottomGap + 2 * Math.PI; // Bottom-right
@@ -72,7 +62,6 @@ function calculateRosaryGeometry(width: number, height: number, mysteryInfo?: My
   let globalBeadIndex = 1;
 
   // 5 decades = 5 groups of 10 small beads, with 4 large beads in between
-  // Total units along loop = 5 * 10 (small) + 4 (large separators) = 54 slots
   const totalSlots = 5 * 10 + 4;
   const angleStep = totalSweep / (totalSlots + 1);
 
@@ -80,7 +69,6 @@ function calculateRosaryGeometry(width: number, height: number, mysteryInfo?: My
 
   for (let decade = 1; decade <= 5; decade++) {
     const decadeData = mysteryInfo?.mystery.decades[decade - 1];
-    const decadeColor = DECADE_COLORS[decade - 1];
 
     // 10 small beads for this decade
     for (let b = 1; b <= 10; b++) {
@@ -92,7 +80,6 @@ function calculateRosaryGeometry(width: number, height: number, mysteryInfo?: My
         id: `small-${globalBeadIndex}`,
         position: globalBeadIndex,
         type: 'small',
-        color: decadeColor,
         x,
         y,
         decadeIndex: decade,
@@ -106,20 +93,18 @@ function calculateRosaryGeometry(width: number, height: number, mysteryInfo?: My
       currentSlot++;
     }
 
-    // Large separator bead after decade 1, 2, 3, 4 (not after 5, which ends at medallion)
+    // Large separator bead after decade 1, 2, 3, 4
     if (decade < 5) {
       const angle = startAngle + currentSlot * angleStep;
       const x = cx + rx * Math.cos(angle);
       const y = ovalCY + ry * Math.sin(angle);
 
-      // Large beads on loop: 52 (chục 1), 53 (chục 2), 54 (chục 3), 55 (chục 4)
       const largePos = 51 + decade;
       const nextDecadeData = mysteryInfo?.mystery.decades[decade];
       loopBeads.push({
         id: `large-dec-${decade}`,
         position: largePos,
         type: 'large',
-        color: 'gold',
         x,
         y,
         decadeIndex: decade,
@@ -133,71 +118,59 @@ function calculateRosaryGeometry(width: number, height: number, mysteryInfo?: My
   }
 
   // ── Pendant (Chuỗi đuôi từ Thánh Giá lên Mề Đay) ───────────────────────────
-  // Bottom to top:
-  // 1. Cross (Thánh Giá)
-  // 2. Large bead 1 (Hạt lớn đầu tiên - Kinh Lạy Cha: pos 51)
-  // 3. 3 Small beads (3 Kinh Kính Mừng Tin-Cậy-Mến: pos 101, 102, 103)
-  // 4. Large bead 2 (Hạt lớn trước Mề Đay: pos 56)
-  // 5. Medallion (Mề Đay Đức Mẹ: pos 57)
-
   const pendantBeads: BeadPos[] = [
     // Medallion (Mề Đay Đức Mẹ)
     {
       id: 'medallion',
       position: 57,
       type: 'medallion',
-      color: 'gold',
       x: cx,
       y: medallionY,
       name: 'Mề Đay Đức Mẹ (Centerpiece)',
       prayer: 'Kinh Lạy Nữ Vương',
-      meaning: 'Bước 9: Sau khi hoàn tất 5 mầu nhiệm - Đọc một Kinh Lạy Nữ Vương, Kinh Trông Cậy và Các Lời Nguyện Tắt',
+      meaning: 'Đọc Kinh Lạy Nữ Vương, Kinh Trông Cậy và Các Lời Nguyện Tắt',
     },
-    // 3 small beads in pendant (Faith, Hope, Charity) - Bước 3
+    // 3 small beads in pendant (Faith, Hope, Charity)
     {
       id: 'pendant-small-3',
       position: 103,
       type: 'small',
-      color: 'white',
       x: cx,
       y: medallionY + 46,
-      name: 'Hạt nhỏ thứ 3 (Trắng)',
+      name: 'Hạt nhỏ thứ 3 (Ơn Đức Mến)',
       prayer: 'Kinh Kính Mừng (Ơn Đức Mến)',
-      meaning: 'Bước 3: Ba Hạt Nhỏ - Mỗi hạt đọc một Kinh Kính Mừng (Cầu xin ơn Đức Mến vẹn toàn)',
+      meaning: 'Kinh Kính Mừng - Cầu xin ơn Đức Mến vẹn toàn',
     },
     {
       id: 'pendant-small-2',
       position: 102,
       type: 'small',
-      color: 'green',
       x: cx,
       y: medallionY + 70,
-      name: 'Hạt nhỏ thứ 2 (Xanh lá)',
+      name: 'Hạt nhỏ thứ 2 (Ơn Đức Cậy)',
       prayer: 'Kinh Kính Mừng (Ơn Đức Cậy)',
-      meaning: 'Bước 3: Ba Hạt Nhỏ - Mỗi hạt đọc một Kinh Kính Mừng (Cầu xin ơn Đức Cậy vững vàng)',
+      meaning: 'Kinh Kính Mừng - Cầu xin ơn Đức Cậy vững vàng',
     },
     {
       id: 'pendant-small-1',
       position: 101,
       type: 'small',
-      color: 'red',
       x: cx,
       y: medallionY + 94,
-      name: 'Hạt nhỏ thứ 1 (Đỏ)',
+      name: 'Hạt nhỏ thứ 1 (Ơn Đức Tin)',
       prayer: 'Kinh Kính Mừng (Ơn Đức Tin)',
-      meaning: 'Bước 3: Ba Hạt Nhỏ - Mỗi hạt đọc một Kinh Kính Mừng (Cầu xin ơn Đức Tin sâu sắc)',
+      meaning: 'Kinh Kính Mừng - Cầu xin ơn Đức Tin sâu sắc',
     },
-    // Bottom large bead (above crucifix) - Bước 2: Hạt lớn xanh dương
+    // Bottom large bead (above crucifix)
     {
       id: 'pendant-large-1',
       position: 51,
       type: 'large',
-      color: 'blue',
       x: cx,
       y: medallionY + 128,
-      name: 'Hạt lớn đầu tiên (Xanh dương)',
-      prayer: 'Kinh Lạy Cha',
-      meaning: 'Bước 2: Đọc Kinh Lạy Cha',
+      name: 'Hạt lớn đầu tiên',
+      prayer: 'Kinh Lạy Cha (Khởi đầu)',
+      meaning: 'Đọc Kinh Lạy Cha khởi đầu chuỗi',
     },
   ];
 
@@ -228,7 +201,6 @@ export default function RosaryChain({
 }: RosaryChainProps) {
   const [selectedBead, setSelectedBead] = useState<BeadPos | null>(null);
   const [selectedDecadeNumber, setSelectedDecadeNumber] = useState<number | null>(null);
-  const [showStepNumbers, setShowStepNumbers] = useState<boolean>(true);
 
   // Compute mystery and decade progress from total small and large beads
   const currentTotalSmall = smallBeads ?? beads.filter(b => b.type === 'small' && b.isLit).length;
@@ -238,7 +210,7 @@ export default function RosaryChain({
     [currentTotalSmall, currentTotalLarge]
   );
 
-  // Automatically reset any manual preview when bead progress advances so the card auto-follows
+  // Automatically reset any manual preview when bead progress advances
   useEffect(() => {
     setSelectedDecadeNumber(null);
   }, [mysteryInfo.currentDecadeNumber, currentTotalSmall, currentTotalLarge]);
@@ -247,7 +219,7 @@ export default function RosaryChain({
   const displayedDecade = mysteryInfo.mystery.decades[displayedDecadeNumber - 1];
   const isActiveDecade = displayedDecadeNumber === mysteryInfo.currentDecadeNumber;
 
-  // Optimized SVG canvas dimensions: 500x760 gives a tall vertical oval proportion
+  // Dimensions
   const dimensions = useMemo(() => {
     return { width: 500, height: 760 };
   }, []);
@@ -259,9 +231,9 @@ export default function RosaryChain({
     [width, height, mysteryInfo]
   );
 
-  // Map of lit bead positions -> actual bead_type from DB (small or large)
+  // Map of lit bead positions
   const litMap = useMemo(() => {
-    const map = new Map<number, string>(); // position -> bead_type
+    const map = new Map<number, string>();
     beads.forEach(b => { if (b.isLit) map.set(b.position, b.type || 'small'); });
     return map;
   }, [beads]);
@@ -282,7 +254,7 @@ export default function RosaryChain({
 
   const litCount = beads.filter(b => b.isLit).length;
 
-  // Build SVG path for the chain wire
+  // Build SVG path for chain wire
   const chainPathLoop = useMemo(() => {
     if (geo.loopBeads.length === 0) return '';
     const points = geo.loopBeads.map(b => `${b.x},${b.y}`).join(' L ');
@@ -316,145 +288,85 @@ export default function RosaryChain({
             </div>
           </div>
         </div>
-
-        {/* Nút bật/tắt hiển thị số thứ tự các bước 1-10 như ảnh hướng dẫn */}
-        <button
-          type="button"
-          onClick={() => setShowStepNumbers(!showStepNumbers)}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '6px 14px',
-            borderRadius: '9999px',
-            fontSize: '12px',
-            fontWeight: 700,
-            cursor: 'pointer',
-            border: showStepNumbers ? '1.5px solid #2563EB' : '1.5px solid #CBD5E1',
-            background: showStepNumbers ? '#EFF6FF' : '#F8FAFC',
-            color: showStepNumbers ? '#1D4ED8' : '#64748B',
-            transition: 'all 0.2s ease',
-          }}
-          title="Bật/tắt số thứ tự các bước 1-10 lần hạt như trong hình hướng dẫn"
-        >
-          <span>🔢</span>
-          <span>{showStepNumbers ? 'Đang hiện số bước (1-10)' : 'Hiện số bước (1-10)'}</span>
-        </button>
       </div>
 
-      {/* ─── THẺ MẦU NHIỆM & SUY NIỆM CHỤC KINH (NẰM PHÍA TRÊN CHUỖI MÂN CÔI) ─── */}
+      {/* ─── THẺ MẦU NHIỆM & SUY NIỆM CHỤC KINH ─── */}
       <div className={styles.mysteryCardWrapper}>
         <div className={styles.mysteryCard} style={{ borderColor: mysteryInfo.mystery.color }}>
-          {/* Header: Season & Round Badge */}
+          {/* Header */}
           <div className={styles.mysteryCardHeader} style={{ background: mysteryInfo.mystery.bgGradient }}>
             <div className={styles.mysterySeasonTag}>
               <span className={styles.mysteryIcon}>{mysteryInfo.mystery.icon}</span>
-              <span className={styles.mysteryName}>{mysteryInfo.mystery.name}</span>
+              <span>{mysteryInfo.mystery.name}</span>
             </div>
-            <span className={styles.mysteryRoundBadge} style={{ background: mysteryInfo.mystery.badgeBg }}>
-              Vòng {mysteryInfo.roundNumber}
-            </span>
+            <div className={styles.mysteryRoundBadge}>
+              Vòng {mysteryInfo.roundNumber} • Chục {displayedDecadeNumber}/5
+            </div>
           </div>
 
-          {/* Body: Current Decade & Meditation */}
-          <div className={styles.mysteryBody}>
-            <div className={styles.mysteryDecadeTitleRow}>
-              <div className={styles.decadeBadge} style={{ color: mysteryInfo.mystery.color }}>
-                Chục {displayedDecade.title} (Hạt {(displayedDecadeNumber - 1) * 10 + 1} – {displayedDecadeNumber * 10})
-              </div>
-              {isActiveDecade ? (
-                <span className={styles.activePulseBadge}>Đang đọc</span>
-              ) : (
+          {/* Decade tabs */}
+          <div className={styles.decadeTabs}>
+            {[1, 2, 3, 4, 5].map((dNum) => {
+              const isCurrent = dNum === mysteryInfo.currentDecadeNumber;
+              const isSelectedTab = dNum === displayedDecadeNumber;
+              const isCompleted = dNum < mysteryInfo.currentDecadeNumber;
+              return (
                 <button
+                  key={dNum}
                   type="button"
-                  className={styles.backToActiveBtn}
-                  onClick={() => setSelectedDecadeNumber(null)}
-                  title="Quay lại chục đang đọc theo tiến độ chuỗi"
+                  className={`${styles.decadeTab} ${isSelectedTab ? styles.decadeTabActive : ''} ${isCompleted ? styles.decadeTabCompleted : ''}`}
+                  onClick={() => setSelectedDecadeNumber(dNum)}
+                  title={`Chục thứ ${dNum}: ${mysteryInfo.mystery.decades[dNum - 1].title}`}
                 >
-                  ↩ Về chục đang đọc
+                  <span className={styles.decadeTabNum}>{dNum}</span>
+                  {isCompleted && <span className={styles.decadeTabCheck}>✓</span>}
+                  {isCurrent && !isCompleted && <span className={styles.decadeTabDot}>•</span>}
                 </button>
-              )}
-            </div>
+              );
+            })}
+          </div>
 
-            {/* Meditation Text from User */}
-            <div className={styles.meditationText}>
-              &ldquo;{displayedDecade.text}&rdquo;
-            </div>
-
-            {/* Lời nguyện Fatima dưới mỗi chục */}
-            <div className={styles.fatimaPrayerText}>
-              <span className={styles.fatimaTag}>✝ Lời nguyện Fatima:</span>
-              &ldquo;Lạy Chúa Giêsu, xin tha tội cho chúng con, xin cứu chúng con khỏi sa hỏa ngục, xin đưa các linh hồn lên thiên đàng, nhất là những linh hồn cần đến lòng Chúa thương xót hơn. Amen.&rdquo;
-            </div>
-
-            {/* Decade Progress (if active) */}
-            {isActiveDecade && (
-              <div className={styles.decadeProgressWrap}>
-                <div className={styles.decadeProgressText}>
-                  <span>Tiến độ chục này:</span>
-                  <strong>{mysteryInfo.decadeProgress}/10 hạt nhỏ</strong>
-                </div>
-                <div className={styles.decadeProgressBar}>
-                  <div
-                    className={styles.decadeProgressFill}
-                    style={{
-                      width: `${(mysteryInfo.decadeProgress / 10) * 100}%`,
-                      backgroundColor: mysteryInfo.mystery.color,
-                    }}
-                  />
-                </div>
-                {mysteryInfo.decadeProgress === 10 && (
-                  <div className={styles.decadeCompleteNote}>
-                    ✨ Đã xong 10 hạt nhỏ! Đọc 1 Kinh Lạy Cha (Hạt to) để qua {mysteryInfo.currentDecadeNumber < 5 ? `Chục ${mysteryInfo.mystery.decades[mysteryInfo.currentDecadeNumber]?.title}` : 'Vòng Mầu Nhiệm mới'}!
-                  </div>
-                )}
+          {/* Active Decade Content */}
+          <div className={styles.mysteryContent}>
+            <div className={styles.decadeHeader}>
+              <div className={styles.decadeTitleRow}>
+                <span className={styles.decadeBadge}>
+                  {displayedDecade.title}
+                  {isActiveDecade && <span className={styles.activePill}>Đang đọc</span>}
+                </span>
+                <span className={styles.decadeFruit}>
+                  Ơn xin: <strong>{displayedDecade.prayerFruit}</strong>
+                </span>
               </div>
-            )}
+            </div>
 
-            {/* 5 Decade Navigation Buttons */}
-            <div className={styles.decadeNavList}>
-              {mysteryInfo.mystery.decades.map((dec) => {
-                const isThisActive = dec.decadeNumber === mysteryInfo.currentDecadeNumber;
-                const isSelected = dec.decadeNumber === displayedDecadeNumber;
-                const isPassed = dec.decadeNumber < mysteryInfo.currentDecadeNumber;
+            <p className={styles.decadeText}>
+              {displayedDecade.text}
+            </p>
 
-                return (
-                  <button
-                    key={dec.decadeNumber}
-                    type="button"
-                    className={`${styles.decadeNavBtn} ${isSelected ? styles.decadeNavBtnSelected : ''} ${isThisActive ? styles.decadeNavBtnActive : ''}`}
-                    onClick={() => {
-                      if (dec.decadeNumber === displayedDecadeNumber) {
-                        setSelectedDecadeNumber(null);
-                      } else {
-                        setSelectedDecadeNumber(dec.decadeNumber);
-                      }
-                    }}
-                    title={dec.text}
-                  >
-                    <span>{dec.decadeNumber}</span>
-                    {isPassed && <span className={styles.checkDone}>✓</span>}
-                  </button>
-                );
-              })}
+            {/* Fatima prayer */}
+            <div className={styles.fatimaBox}>
+              <span className={styles.fatimaTag}>Lời nguyện Fatima:</span>
+              <span className={styles.fatimaText}>
+                «Lạy Chúa Giêsu, xin tha tội cho chúng con, xin cứu chúng con khỏi sa hỏa ngục, xin đem các linh hồn lên thiên đàng, nhất là những linh hồn cần đến lòng Chúa thương xót hơn.»
+              </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main SVG Container: Chuỗi Mân Côi nằm phía dưới, phóng to trọn vẹn */}
+      {/* ─── SVG ROSARY CHAIN CANVAS ─── */}
       <div className={styles.svgContainer}>
         <svg
           viewBox={`0 0 ${width} ${height}`}
-          width="100%"
-          height="100%"
           className={styles.rosarySvg}
+          style={{ width: '100%', height: 'auto', maxHeight: '720px' }}
         >
           <defs>
-            {/* Filters for Holy Glow in 5 Mission Colors */}
-            <filter id="glowGoldHoly" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur1" />
-              <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur2" />
+            {/* Soft Holy Glow Filter for Blue Beads */}
+            <filter id="glowBlueHoly" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur1" />
+              <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur2" />
               <feMerge>
                 <feMergeNode in="blur2" />
                 <feMergeNode in="blur1" />
@@ -462,47 +374,18 @@ export default function RosaryChain({
               </feMerge>
             </filter>
 
-            <filter id="glowYellowHoly" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
+            {/* Soft Holy Glow Filter for Gold Beads & Cross */}
+            <filter id="glowGoldHoly" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur1" />
+              <feGaussianBlur in="SourceGraphic" stdDeviation="16" result="blur2" />
               <feMerge>
-                <feMergeNode in="blur" />
+                <feMergeNode in="blur2" />
+                <feMergeNode in="blur1" />
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
 
-            <filter id="glowGreenHoly" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-
-            <filter id="glowBlueHoly" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-
-            <filter id="glowRedHoly" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-
-            <filter id="glowWhiteHoly" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-
-            {/* Radiant Halo background for Our Lady */}
+            {/* Gradients */}
             <radialGradient id="haloBgGrad" cx="50%" cy="50%" r="50%">
               <stop offset="0%" stopColor="#FFFBEB" stopOpacity="0.95" />
               <stop offset="60%" stopColor="#FEF3C7" stopOpacity="0.75" />
@@ -510,84 +393,35 @@ export default function RosaryChain({
               <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
             </radialGradient>
 
-            {/* 1. Yellow Beads (Chục 1 - Châu Á) */}
-            <linearGradient id="yellowBeadLit" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#FEF08A" />
-              <stop offset="45%" stopColor="#EAB308" />
-              <stop offset="100%" stopColor="#CA8A04" />
-            </linearGradient>
-            <linearGradient id="yellowBeadUnlit" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#FEFCE8" />
-              <stop offset="50%" stopColor="#FEF08A" />
-              <stop offset="100%" stopColor="#EAB308" />
-            </linearGradient>
-
-            {/* 2. Green Beads (Chục 2 & Hạt nhỏ 2 - Châu Phi) */}
-            <linearGradient id="greenBeadLit" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#86EFAC" />
-              <stop offset="45%" stopColor="#22C55E" />
-              <stop offset="100%" stopColor="#15803D" />
-            </linearGradient>
-            <linearGradient id="greenBeadUnlit" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#F0FDF4" />
-              <stop offset="50%" stopColor="#BBF7D0" />
-              <stop offset="100%" stopColor="#4ADE80" />
-            </linearGradient>
-
-            {/* 3. Blue Beads (Chục 3 & Hạt lớn 1 - Châu Đại Dương) */}
-            <linearGradient id="blueBeadLit" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#93C5FD" />
-              <stop offset="45%" stopColor="#3B82F6" />
-              <stop offset="100%" stopColor="#1D4ED8" />
-            </linearGradient>
-            <linearGradient id="blueBeadUnlit" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#EFF6FF" />
-              <stop offset="50%" stopColor="#BFDBFE" />
-              <stop offset="100%" stopColor="#60A5FA" />
-            </linearGradient>
-
-            {/* 4. Red Beads (Chục 4 & Hạt nhỏ 1 - Châu Mỹ) */}
-            <linearGradient id="redBeadLit" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#FCA5A5" />
-              <stop offset="45%" stopColor="#EF4444" />
-              <stop offset="100%" stopColor="#991B1B" />
-            </linearGradient>
-            <linearGradient id="redBeadUnlit" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#FEF2F2" />
-              <stop offset="50%" stopColor="#FECACA" />
-              <stop offset="100%" stopColor="#F87171" />
-            </linearGradient>
-
-            {/* 5. White Beads (Chục 5 & Hạt nhỏ 3 - Châu Âu) */}
-            <linearGradient id="whiteBeadLit" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#FFFFFF" />
-              <stop offset="50%" stopColor="#F8FAFC" />
-              <stop offset="100%" stopColor="#CBD5E1" />
-            </linearGradient>
-            <linearGradient id="whiteBeadUnlit" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#FFFFFF" />
-              <stop offset="50%" stopColor="#F1F5F9" />
-              <stop offset="100%" stopColor="#E2E8F0" />
-            </linearGradient>
-
-            {/* Gold Beads (Hạt lớn & Mề Đay) */}
+            {/* Gold Lit Bead (Hạt lớn & Mề Đay) */}
             <linearGradient id="goldBeadLit" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#FEF08A" />
               <stop offset="40%" stopColor="#F59E0B" />
               <stop offset="100%" stopColor="#B45309" />
             </linearGradient>
-            <linearGradient id="goldBeadUnlit" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#FFFBEB" />
-              <stop offset="50%" stopColor="#FEF3C7" />
-              <stop offset="100%" stopColor="#FDE68A" />
+
+            {/* Blue Lit Bead (Hạt nhỏ Kính Mừng truyền thống ban đầu) */}
+            <linearGradient id="blueBeadLit" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#93C5FD" />
+              <stop offset="40%" stopColor="#3B82F6" />
+              <stop offset="100%" stopColor="#1D4ED8" />
             </linearGradient>
 
+            {/* Unlit Bead (Hạt ngọc xám bạc thanh thoát ban đầu) */}
+            <linearGradient id="unlitBead" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#F1F5F9" />
+              <stop offset="50%" stopColor="#CBD5E1" />
+              <stop offset="100%" stopColor="#64748B" />
+            </linearGradient>
+
+            {/* Chain Wire Gradient */}
             <linearGradient id="goldChainGrad" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#FDE68A" />
               <stop offset="50%" stopColor="#D97706" />
               <stop offset="100%" stopColor="#78350F" />
             </linearGradient>
 
+            {/* Shine Reflection */}
             <radialGradient id="shineReflect" cx="30%" cy="30%" r="40%">
               <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.9" />
               <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
@@ -605,7 +439,6 @@ export default function RosaryChain({
           </defs>
 
           {/* ─── 1. CENTER IMAGE OF OUR LADY (ĐỨC MẸ BAN ƠN) ─── */}
-          {/* Radiant Halo background */}
           <ellipse
             cx={geo.cx}
             cy={geo.ovalCY}
@@ -640,19 +473,7 @@ export default function RosaryChain({
             />
           </g>
 
-          {/* Soft inner vignette/glow over the image */}
-          <ellipse
-            cx={geo.cx}
-            cy={geo.ovalCY}
-            rx={geo.rx * 0.78}
-            ry={geo.ry * 0.88}
-            fill="none"
-            stroke="url(#goldChainGrad)"
-            strokeWidth="2.5"
-          />
-
-          {/* ─── 2. ROSARY STRING / WIRE (DÂY NỐI CHUỖI) ─── */}
-          {/* Main Decade Loop Chain */}
+          {/* ─── 2. ROSARY CHAIN WIRE ─── */}
           <path
             d={chainPathLoop}
             fill="none"
@@ -675,60 +496,19 @@ export default function RosaryChain({
             className={styles.rosaryChainLine}
           />
 
-          {/* ─── 3. BEADS (HẠT MÂN CÔI THEO 5 MÀU TRUYỀN GIÁO) ─── */}
-          {/* Render Loop Beads */}
+          {/* ─── 3. BEADS (GIỮ NGUYÊN MÀU SẮC BAN ĐẦU CỦA VÒNG CHUỖI) ─── */}
+          {/* Loop Beads (50 hạt nhỏ xanh dương + 4 hạt lớn vàng) */}
           {geo.loopBeads.map((bead) => {
+            const isLarge = bead.type === 'large';
             const isLit = litMap.has(bead.position);
             const isNew = newSet.has(bead.position);
-            const isLarge = bead.type === 'large';
             const radius = isLarge ? 12 : 7.5;
             const isSelected = selectedBead?.id === bead.id;
 
-            // Compute style based on bead color
-            let fill = 'url(#unlitBead)';
-            let stroke = '#64748B';
-            let glowFilter = 'url(#glowGoldHoly)';
-            let auraFill = 'rgba(245, 158, 11, 0.4)';
-
-            switch (bead.color) {
-              case 'yellow':
-                fill = isLit ? 'url(#yellowBeadLit)' : 'url(#yellowBeadUnlit)';
-                stroke = isSelected ? '#EF4444' : isLit ? '#A16207' : '#CA8A04';
-                glowFilter = 'url(#glowYellowHoly)';
-                auraFill = 'rgba(234, 179, 8, 0.45)';
-                break;
-              case 'green':
-                fill = isLit ? 'url(#greenBeadLit)' : 'url(#greenBeadUnlit)';
-                stroke = isSelected ? '#EF4444' : isLit ? '#14532D' : '#16A34A';
-                glowFilter = 'url(#glowGreenHoly)';
-                auraFill = 'rgba(34, 197, 94, 0.45)';
-                break;
-              case 'blue':
-                fill = isLit ? 'url(#blueBeadLit)' : 'url(#blueBeadUnlit)';
-                stroke = isSelected ? '#EF4444' : isLit ? '#1E3A8A' : '#2563EB';
-                glowFilter = 'url(#glowBlueHoly)';
-                auraFill = 'rgba(59, 130, 246, 0.45)';
-                break;
-              case 'red':
-                fill = isLit ? 'url(#redBeadLit)' : 'url(#redBeadUnlit)';
-                stroke = isSelected ? '#3B82F6' : isLit ? '#7F1D1D' : '#DC2626';
-                glowFilter = 'url(#glowRedHoly)';
-                auraFill = 'rgba(239, 68, 68, 0.45)';
-                break;
-              case 'white':
-                fill = isLit ? 'url(#whiteBeadLit)' : 'url(#whiteBeadUnlit)';
-                stroke = isSelected ? '#EF4444' : isLit ? '#D97706' : '#94A3B8';
-                glowFilter = 'url(#glowWhiteHoly)';
-                auraFill = 'rgba(255, 255, 255, 0.65)';
-                break;
-              case 'gold':
-              default:
-                fill = isLit ? 'url(#goldBeadLit)' : 'url(#goldBeadUnlit)';
-                stroke = isSelected ? '#EF4444' : isLit ? '#78350F' : '#D97706';
-                glowFilter = 'url(#glowGoldHoly)';
-                auraFill = 'rgba(245, 158, 11, 0.45)';
-                break;
-            }
+            const fill = isLit ? (isLarge ? 'url(#goldBeadLit)' : 'url(#blueBeadLit)') : 'url(#unlitBead)';
+            const stroke = isSelected ? '#EF4444' : isLit ? (isLarge ? '#B45309' : '#1D4ED8') : '#475569';
+            const glowFilter = isLarge ? 'url(#glowGoldHoly)' : 'url(#glowBlueHoly)';
+            const auraFill = isLarge ? 'rgba(245, 158, 11, 0.45)' : 'rgba(59, 130, 246, 0.35)';
 
             return (
               <g
@@ -783,50 +563,16 @@ export default function RosaryChain({
           {/* Render Pendant Beads (Chuỗi đuôi) */}
           {geo.pendantBeads.map((bead) => {
             const isMedallion = bead.type === 'medallion';
+            const isLarge = bead.type === 'large';
             const isLit = litMap.has(bead.position);
             const isNew = newSet.has(bead.position);
-            const radius = isMedallion ? 16 : bead.type === 'large' ? 12 : 8;
+            const radius = isMedallion ? 16 : isLarge ? 12 : 8;
             const isSelected = selectedBead?.id === bead.id;
 
-            // Visual styles
-            let fill = 'url(#unlitBead)';
-            let stroke = '#64748B';
-            let glowFilter = 'url(#glowGoldHoly)';
-            let auraFill = 'rgba(245, 158, 11, 0.4)';
-
-            switch (bead.color) {
-              case 'blue':
-                fill = isLit ? 'url(#blueBeadLit)' : 'url(#blueBeadUnlit)';
-                stroke = isSelected ? '#EF4444' : isLit ? '#1E3A8A' : '#2563EB';
-                glowFilter = 'url(#glowBlueHoly)';
-                auraFill = 'rgba(59, 130, 246, 0.45)';
-                break;
-              case 'red':
-                fill = isLit ? 'url(#redBeadLit)' : 'url(#redBeadUnlit)';
-                stroke = isSelected ? '#3B82F6' : isLit ? '#7F1D1D' : '#DC2626';
-                glowFilter = 'url(#glowRedHoly)';
-                auraFill = 'rgba(239, 68, 68, 0.45)';
-                break;
-              case 'green':
-                fill = isLit ? 'url(#greenBeadLit)' : 'url(#greenBeadUnlit)';
-                stroke = isSelected ? '#EF4444' : isLit ? '#14532D' : '#16A34A';
-                glowFilter = 'url(#glowGreenHoly)';
-                auraFill = 'rgba(34, 197, 94, 0.45)';
-                break;
-              case 'white':
-                fill = isLit ? 'url(#whiteBeadLit)' : 'url(#whiteBeadUnlit)';
-                stroke = isSelected ? '#EF4444' : isLit ? '#D97706' : '#94A3B8';
-                glowFilter = 'url(#glowWhiteHoly)';
-                auraFill = 'rgba(255, 255, 255, 0.65)';
-                break;
-              case 'gold':
-              default:
-                fill = isLit ? 'url(#goldBeadLit)' : 'url(#goldBeadUnlit)';
-                stroke = isSelected ? '#EF4444' : isLit ? '#78350F' : '#D97706';
-                glowFilter = 'url(#glowGoldHoly)';
-                auraFill = 'rgba(245, 158, 11, 0.45)';
-                break;
-            }
+            const fill = isLit ? (isLarge || isMedallion ? 'url(#goldBeadLit)' : 'url(#blueBeadLit)') : 'url(#unlitBead)';
+            const stroke = isSelected ? '#EF4444' : isLit ? (isLarge || isMedallion ? '#B45309' : '#1D4ED8') : '#475569';
+            const glowFilter = (isLarge || isMedallion) ? 'url(#glowGoldHoly)' : 'url(#glowBlueHoly)';
+            const auraFill = (isLarge || isMedallion) ? 'rgba(245, 158, 11, 0.45)' : 'rgba(59, 130, 246, 0.35)';
 
             return (
               <g
@@ -840,7 +586,7 @@ export default function RosaryChain({
                   <circle
                     cx={bead.x}
                     cy={bead.y}
-                    r={radius + (bead.type === 'large' || isMedallion ? 8 : 5)}
+                    r={radius + (isLarge || isMedallion ? 8 : 5)}
                     fill={auraFill}
                     filter={glowFilter}
                   />
@@ -862,7 +608,7 @@ export default function RosaryChain({
                       cy={bead.y}
                       r={radius - 3}
                       fill="none"
-                      stroke={isLit ? '#FEF08A' : '#FDE68A'}
+                      stroke={isLit ? '#FEF08A' : '#94A3B8'}
                       strokeWidth="1"
                       strokeDasharray="2 1"
                     />
@@ -871,7 +617,7 @@ export default function RosaryChain({
                       y={bead.y + 4}
                       textAnchor="middle"
                       fontSize="11"
-                      fill={isLit ? '#78350F' : '#92400E'}
+                      fill={isLit ? '#78350F' : '#475569'}
                       fontWeight="900"
                     >
                       M
@@ -909,7 +655,7 @@ export default function RosaryChain({
             );
           })}
 
-          {/* ─── 4. CRUCIFIX (CÂY THÁNH GIÁ - BƯỚC 1 & BƯỚC 10) ─── */}
+          {/* ─── 4. CRUCIFIX (CÂY THÁNH GIÁ) ─── */}
           {(() => {
             const isCrossLit = litMap.has(0);
             return (
@@ -920,12 +666,11 @@ export default function RosaryChain({
                     id: 'crucifix',
                     position: 0,
                     type: 'cross',
-                    color: 'gold',
                     x: geo.crossX,
                     y: geo.crossY,
                     name: 'Cây Thánh Giá',
                     prayer: 'Dấu Thánh Giá & Kinh Tin Kính',
-                    meaning: 'Bước 1: Làm Dấu Thánh Giá và đọc Kinh Tin Kính. Bước 10: Làm Dấu và hôn Thánh Giá kết thúc.',
+                    meaning: 'Làm Dấu Thánh Giá và đọc Kinh Tin Kính khi mở đầu; Làm Dấu và hôn kính Thánh Giá khi hoàn tất.',
                   })
                 }
                 style={{ cursor: 'pointer' }}
@@ -1016,61 +761,10 @@ export default function RosaryChain({
                   strokeLinecap="round"
                 />
 
-                <title>Cây Thánh Giá: Dấu Thánh Giá & Kinh Tin Kính (Bước 1 & 10)</title>
+                <title>Cây Thánh Giá: Dấu Thánh Giá & Kinh Tin Kính</title>
               </g>
             );
           })()}
-
-          {/* ─── 5. NUMBERED STEP CALLOUT BADGES (6 BƯỚC KHỞI ĐẦU & KẾT THÚC TRÊN CỘT DỌC) ─── */}
-          {showStepNumbers && (
-            <g className="rosary-step-callouts">
-              {[
-                { step: '1', title: '1. Làm Dấu Thánh Giá và đọc Kinh Tin Kính', x: geo.crossX + 34, y: geo.crossY + 24, targetX: geo.crossX + 16, targetY: geo.crossY + 24, bg: '#78350F' },
-                { step: '2', title: '2. Đọc Kinh Lạy Cha (Hạt lớn xanh dương)', x: geo.cx + 38, y: geo.medallionY + 128, targetX: geo.cx + 14, targetY: geo.medallionY + 128, bg: '#2563EB' },
-                { step: '3', title: '3. Ba Hạt Nhỏ: Mỗi hạt đọc một Kinh Kính Mừng', x: geo.cx + 38, y: geo.medallionY + 70, targetX: geo.cx + 12, targetY: geo.medallionY + 70, bg: '#16A34A' },
-                { step: '4', title: '4. Đọc Kinh Sáng Danh', x: geo.cx + 38, y: geo.medallionY + 23, targetX: geo.cx, targetY: geo.medallionY + 23, bg: '#D97706' },
-                { step: '5', title: '5. Đọc Kinh Lạy Nữ Vương & Kinh Trông Cậy', x: geo.cx - 36, y: geo.medallionY, targetX: geo.cx - 16, targetY: geo.medallionY, bg: '#D97706' },
-                { step: '6', title: '6. Làm Dấu Thánh Giá và hôn Thánh Giá kết thúc', x: geo.crossX - 34, y: geo.crossY + 24, targetX: geo.crossX - 16, targetY: geo.crossY + 24, bg: '#78350F' },
-              ].map((badge) => (
-                <g key={badge.step} style={{ cursor: 'pointer' }}>
-                  {/* Dashed pointer line */}
-                  <line
-                    x1={badge.x}
-                    y1={badge.y}
-                    x2={badge.targetX}
-                    y2={badge.targetY}
-                    stroke="#475569"
-                    strokeWidth="1.2"
-                    strokeDasharray="2 2"
-                    opacity="0.75"
-                  />
-                  {/* Badge Circle */}
-                  <circle
-                    cx={badge.x}
-                    cy={badge.y}
-                    r="9.5"
-                    fill="#FFFFFF"
-                    stroke={badge.bg}
-                    strokeWidth="2"
-                    filter="drop-shadow(0 1px 3px rgba(0,0,0,0.25))"
-                  />
-                  {/* Step Number Text */}
-                  <text
-                    x={badge.x}
-                    y={badge.y + 3.5}
-                    textAnchor="middle"
-                    fontSize="9.5"
-                    fontWeight="800"
-                    fill={badge.bg}
-                    fontFamily="Arial, sans-serif"
-                  >
-                    {badge.step}
-                  </text>
-                  <title>{badge.title}</title>
-                </g>
-              ))}
-            </g>
-          )}
         </svg>
       </div>
 

@@ -157,8 +157,8 @@ export async function POST(req: NextRequest) {
   const newBeadPositions: number[] = [];
   const taskTitle = task.title || '';
 
-  if (taskTitle.startsWith('1.') || (task.bead_type === 'cross' && taskTitle.includes('Tin Kính'))) {
-    // Bước 1: Thánh Giá (Làm Dấu Thánh Giá và đọc Kinh Tin Kính)
+  if (taskTitle.includes('Tin Kính') && task.bead_type === 'cross') {
+    // Thánh Giá: Làm Dấu Thánh Giá và đọc Kinh Tin Kính
     try {
       await db.run(`
         INSERT INTO rosary_beads (user_id, bead_position, bead_type, task_completion_id)
@@ -170,8 +170,8 @@ export async function POST(req: NextRequest) {
       newBeadPositions.push(0);
     } catch {}
 
-  } else if (taskTitle.startsWith('2.') || (task.bead_type === 'large' && taskTitle.includes('Lạy Cha') && !taskTitle.includes('5.') && !taskTitle.includes('8.'))) {
-    // Bước 2: Hạt lớn đầu tiên (Kinh Lạy Cha - Hạt màu xanh dương)
+  } else if (taskTitle.includes('Khởi đầu') && task.bead_type === 'large') {
+    // Hạt lớn đầu tiên trên cột dọc: Đọc Kinh Lạy Cha (Khởi đầu chuỗi)
     try {
       await db.run(`
         INSERT INTO rosary_beads (user_id, bead_position, bead_type, task_completion_id)
@@ -183,8 +183,8 @@ export async function POST(req: NextRequest) {
       newBeadPositions.push(51);
     } catch {}
 
-  } else if (taskTitle.startsWith('3.') || taskTitle.includes('Ba Hạt Nhỏ')) {
-    // Bước 3: Ba hạt nhỏ (3 Kinh Kính Mừng: 101 Đỏ, 102 Xanh lá, 103 Trắng)
+  } else if (taskTitle.includes('Sáng Danh')) {
+    // Đọc Kinh Sáng Danh trên đoạn dây trước Mề Đay (thắp sáng 3 hạt nhỏ Tin-Cậy-Mến)
     const smallPendant = [101, 102, 103];
     for (const pos of smallPendant) {
       try {
@@ -199,12 +199,8 @@ export async function POST(req: NextRequest) {
       } catch {}
     }
 
-  } else if (taskTitle.startsWith('4.')) {
-    // Bước 4: Đọc Kinh Sáng Danh (kết thúc phần chuỗi đầu trước khi vào các Mầu Nhiệm)
-    newBeadPositions.push(103);
-
-  } else if (taskTitle.startsWith('5.') || task.bead_type === 'medallion') {
-    // Bước 5: Mề Đay Đức Mẹ (Kinh Lạy Nữ Vương & Kinh Trông Cậy)
+  } else if (taskTitle.includes('Nữ Vương') || task.bead_type === 'medallion') {
+    // Mề Đay Đức Mẹ: Đọc Kinh Lạy Nữ Vương & Kinh Trông Cậy
     try {
       await db.run(`
         INSERT INTO rosary_beads (user_id, bead_position, bead_type, task_completion_id)
@@ -216,8 +212,8 @@ export async function POST(req: NextRequest) {
       newBeadPositions.push(57);
     } catch {}
 
-  } else if (taskTitle.startsWith('6.') || (taskTitle.includes('kết thúc') && task.bead_type === 'cross')) {
-    // Bước 6: Làm Dấu Thánh Giá & Hôn Thánh Giá kết thúc
+  } else if (taskTitle.includes('kết thúc') && task.bead_type === 'cross') {
+    // Kết thúc: Làm Dấu Thánh Giá & Hôn Thánh Giá kết thúc
     try {
       await db.run(`
         INSERT INTO rosary_beads (user_id, bead_position, bead_type, task_completion_id)

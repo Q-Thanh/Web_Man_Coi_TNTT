@@ -168,9 +168,16 @@ export default function DashboardPage() {
   if (!dashData) return null;
 
   const { user, beads, litCount, smallBeads, largeBeads, streak, todayBeads } = dashData;
-  const stemTasks = tasks.filter(t => /^\d+\./.test(t.title));
-  const kinhMungTasks = tasks.filter(t => !/^\d+\./.test(t.title) && (t.bead_type === 'small' || t.title.includes('Kính Mừng')));
-  const layChaTasks = tasks.filter(t => !/^\d+\./.test(t.title) && (t.bead_type === 'large' || t.title.includes('Lạy Cha')));
+  const stemTaskTitles = [
+    'Làm Dấu Thánh Giá và đọc Kinh Tin Kính',
+    'Đọc Kinh Lạy Cha (Khởi đầu chuỗi)',
+    'Đọc Kinh Sáng Danh',
+    'Đọc Kinh Lạy Nữ Vương & Kinh Trông Cậy',
+    'Làm Dấu Thánh Giá và hôn Thánh Giá kết thúc'
+  ];
+  const stemTasks = tasks.filter(t => stemTaskTitles.includes(t.title) || t.bead_type === 'cross' || t.bead_type === 'medallion' || t.bead_type === 'special' || t.title.includes('Khởi đầu'));
+  const kinhMungTasks = tasks.filter(t => !stemTasks.some(st => st.id === t.id) && (t.bead_type === 'small' || t.title.includes('Kính Mừng')));
+  const layChaTasks = tasks.filter(t => !stemTasks.some(st => st.id === t.id) && (t.bead_type === 'large' || t.title.includes('Lạy Cha')));
 
   const rosaryBeads = beads.map(b => ({
     ...b,
@@ -330,11 +337,11 @@ export default function DashboardPage() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
                   <span style={{ fontSize: '24px' }}>📿</span>
                   <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#1E3A8A', margin: 0 }}>
-                    Khởi Đầu & Kết Thúc Chuỗi Mân Côi (Các Hạt Dọc)
+                    Khởi Đầu & Kết Thúc Giờ Kinh (Các Hạt Dọc)
                   </h2>
                 </div>
                 <p style={{ fontSize: '13.5px', color: '#475569', margin: 0, lineHeight: 1.5 }}>
-                  Lần lượt hoàn thành từng bước <strong>(1) đến (6)</strong> để thắp sáng các hạt trên cột dọc (Cây Thánh Giá, Hạt lớn xanh dương, 3 hạt nhỏ Tin-Cậy-Mến và Mề Đay Đức Mẹ)!
+                  Hoàn thành các kinh nguyện mở đầu và kết thúc tại Cây Thánh Giá, hạt lớn và Mề Đay Đức Mẹ!
                 </p>
               </div>
 
@@ -357,7 +364,7 @@ export default function DashboardPage() {
               <h2 className={styles.sectionTitle} style={{ marginTop: '16px' }}>
                 🌹 Kinh Kính Mừng <span style={{ fontSize: '0.9rem', color: '#6B7280' }}>(Vòng chuỗi 50 hạt - 5 chục kinh)</span>
               </h2>
-              <p className={styles.sectionSub}>Chọn số lượng kinh đã đọc để thắp sáng 50 hạt nhỏ theo 5 sắc màu mầu nhiệm (1 kinh = 1 điểm)</p>
+              <p className={styles.sectionSub}>Chọn số lượng kinh đã đọc để thắp sáng các hạt nhỏ trên vòng chuỗi (1 kinh = 1 điểm)</p>
               <div className={styles.taskList} style={{ marginBottom: '36px' }}>
                 {kinhMungTasks.map(task => (
                   <TaskCard
@@ -406,22 +413,9 @@ function TaskCard({
   isCompleting: boolean;
   onComplete: () => void;
 }) {
-  const match = task.title.match(/^(\d+)\.\s*(.*)/);
-  const stepNumber = match ? match[1] : null;
-  const cleanTitle = match ? match[2] : task.title;
-
   const isLarge = task.bead_type === 'large';
   const isCross = task.bead_type === 'cross';
   const isMedallion = task.bead_type === 'medallion';
-
-  // Choose accent color for step badge
-  const stepColor = stepNumber === '1' ? '#78350F'
-    : stepNumber === '2' ? '#2563EB'
-    : stepNumber === '3' ? '#16A34A'
-    : stepNumber === '4' ? '#D97706'
-    : stepNumber === '5' ? '#D97706'
-    : stepNumber === '6' ? '#78350F'
-    : '#2563EB';
 
   const bgColor = isCross ? '#FFFBEB' : isMedallion ? '#FEF3C7' : isLarge ? '#EFF6FF' : '#FFF1F2';
   const doneCount = task.completionsToday || 0;
@@ -430,25 +424,6 @@ function TaskCard({
     <div className={`${styles.taskCard} ${isCompleting ? styles.taskCompleting : ''}`}>
       <div className={styles.taskIcon} style={{ background: bgColor, position: 'relative' }}>
         {task.icon}
-        {stepNumber && (
-          <span style={{
-            position: 'absolute',
-            bottom: '-4px', left: '-4px',
-            background: stepColor,
-            color: '#fff',
-            borderRadius: '999px',
-            fontSize: '11px',
-            fontWeight: 800,
-            width: '20px',
-            height: '20px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 2px 4px rgba(0,0,0,.25)',
-          }}>
-            {stepNumber}
-          </span>
-        )}
         {doneCount > 0 && (
           <span style={{
             position: 'absolute',
@@ -473,8 +448,7 @@ function TaskCard({
 
       <div className={styles.taskBody}>
         <div className={styles.taskTitle}>
-          {stepNumber && <span style={{ color: stepColor, fontWeight: 900, marginRight: 6 }}>Bước {stepNumber}:</span>}
-          {cleanTitle}
+          {task.title}
         </div>
         <div className={styles.taskDesc}>{task.description}</div>
         <div className={styles.taskMeta}>
@@ -482,14 +456,14 @@ function TaskCard({
             {task.icon} +{task.bead_progress} {isCross ? 'Thánh Giá' : isMedallion ? 'Mề Đay' : isLarge ? 'hạt to' : 'hạt nhỏ'}
           </span>
           <span className={styles.taskType}>
-            {doneCount > 0 ? `Đã hoàn thành ${doneCount} lần hôm nay` : 'Theo hướng dẫn'}
+            {doneCount > 0 ? `Đã hoàn thành ${doneCount} lần hôm nay` : 'Hằng ngày'}
           </span>
         </div>
       </div>
 
       <div className={styles.taskRight}>
         <div className={styles.taskPoints}>
-          <span className={styles.taskPointsNum} style={{ color: stepColor }}>
+          <span className={styles.taskPointsNum}>
             +{task.points || task.bead_progress}
           </span>
           <span className={styles.taskPointsLabel}>điểm thi đua</span>

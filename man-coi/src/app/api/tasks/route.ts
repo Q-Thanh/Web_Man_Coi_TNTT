@@ -20,18 +20,24 @@ export async function GET() {
   `) as any[];
 
   // Custom sort:
-  // 1. Stem steps: 1., 2., 3., 4., 5., 6. in exact order
+  // 1. Stem tasks: Làm Dấu Thánh Giá -> Lạy Cha khởi đầu -> Sáng Danh -> Lạy Nữ Vương -> Kết thúc
   // 2. Kinh Kính Mừng (small beads) by bead_progress ASC (1, 5, 10, 15, 20, 30, 50)
   // 3. Kinh Lạy Cha (large beads) by bead_progress ASC (1, 5)
-  const tasks = rawTasks.sort((a, b) => {
-    const stepMatchA = a.title.match(/^(\d+)\./);
-    const stepMatchB = b.title.match(/^(\d+)\./);
+  const stemOrder = [
+    'Làm Dấu Thánh Giá và đọc Kinh Tin Kính',
+    'Đọc Kinh Lạy Cha (Khởi đầu chuỗi)',
+    'Đọc Kinh Sáng Danh',
+    'Đọc Kinh Lạy Nữ Vương & Kinh Trông Cậy',
+    'Làm Dấu Thánh Giá và hôn Thánh Giá kết thúc'
+  ];
 
-    if (stepMatchA && stepMatchB) {
-      return parseInt(stepMatchA[1]) - parseInt(stepMatchB[1]);
-    }
-    if (stepMatchA) return -1;
-    if (stepMatchB) return 1;
+  const tasks = rawTasks.sort((a, b) => {
+    const idxA = stemOrder.indexOf(a.title);
+    const idxB = stemOrder.indexOf(b.title);
+
+    if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+    if (idxA !== -1) return -1;
+    if (idxB !== -1) return 1;
 
     if (a.bead_type === 'small' && b.bead_type !== 'small') return -1;
     if (a.bead_type !== 'small' && b.bead_type === 'small') return 1;

@@ -200,17 +200,9 @@ export async function POST(req: NextRequest) {
     }
 
   } else if (taskTitle.startsWith('4.')) {
-    // Bước 4: Hạt lớn trước Mề Đay (Đọc Kinh Sáng Danh)
-    try {
-      await db.run(`
-        INSERT INTO rosary_beads (user_id, bead_position, bead_type, task_completion_id)
-        VALUES (?, 56, 'large', ?)
-        ON CONFLICT(user_id, bead_position) DO UPDATE SET
-          lit_at = datetime('now'),
-          task_completion_id = excluded.task_completion_id
-      `, userId, completionId);
-      newBeadPositions.push(56);
-    } catch {}
+    // Bước 4: Đọc Kinh Sáng Danh (kết thúc phần chuỗi đầu trước khi vào các Mầu Nhiệm)
+    // Không có hạt riêng trên cột dọc (kinh đọc trên đoạn dây nối trước Mề Đay)
+    newBeadPositions.push(103);
 
   } else if (taskTitle.startsWith('5.')) {
     // Bước 5: Hạt lớn mở đầu Chục 1 (Ngắm Mầu Nhiệm Thứ Nhất & Kinh Lạy Cha)

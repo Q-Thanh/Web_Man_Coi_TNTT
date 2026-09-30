@@ -106,12 +106,7 @@ export async function GET() {
     });
   });
 
-  beads.push({
-    position: 56,
-    type: 'large',
-    isLit: userLitMap.has(56) || largeBeads > 1,
-    litAt: userLitMap.get(56)?.lit_at || null,
-  });
+
 
   beads.push({
     position: 57,

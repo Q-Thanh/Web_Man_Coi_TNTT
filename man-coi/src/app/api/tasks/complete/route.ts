@@ -201,106 +201,10 @@ export async function POST(req: NextRequest) {
 
   } else if (taskTitle.startsWith('4.')) {
     // Bước 4: Đọc Kinh Sáng Danh (kết thúc phần chuỗi đầu trước khi vào các Mầu Nhiệm)
-    // Không có hạt riêng trên cột dọc (kinh đọc trên đoạn dây nối trước Mề Đay)
     newBeadPositions.push(103);
 
-  } else if (taskTitle.startsWith('5.')) {
-    // Bước 5: Hạt lớn mở đầu Chục 1 (Ngắm Mầu Nhiệm Thứ Nhất & Kinh Lạy Cha)
-    try {
-      await db.run(`
-        INSERT INTO rosary_beads (user_id, bead_position, bead_type, task_completion_id)
-        VALUES (?, 52, 'large', ?)
-        ON CONFLICT(user_id, bead_position) DO UPDATE SET
-          lit_at = datetime('now'),
-          task_completion_id = excluded.task_completion_id
-      `, userId, completionId);
-      newBeadPositions.push(52);
-    } catch {}
-
-  } else if (taskTitle.startsWith('6.')) {
-    // Bước 6: 10 Hạt Nhỏ Chục 1 (Mỗi hạt đọc một Kinh Kính Mừng - 10 hạt màu Vàng)
-    for (let pos = 1; pos <= 10; pos++) {
-      try {
-        await db.run(`
-          INSERT INTO rosary_beads (user_id, bead_position, bead_type, task_completion_id)
-          VALUES (?, ?, 'small', ?)
-          ON CONFLICT(user_id, bead_position) DO UPDATE SET
-            lit_at = datetime('now'),
-            task_completion_id = excluded.task_completion_id
-        `, userId, pos, completionId);
-        newBeadPositions.push(pos);
-      } catch {}
-    }
-
-  } else if (taskTitle.startsWith('7.')) {
-    // Bước 7: Kinh Sáng Danh & Fatima kết thúc chục
-    newBeadPositions.push(10);
-
-  } else if (taskTitle.startsWith('8.')) {
-    // Bước 8: Ngắm Mầu Nhiệm Thứ Hai & các Mầu Nhiệm tiếp theo (Chục 2, 3, 4, 5)
-    // Tự động kiểm tra chục tiếp theo cần thắp sáng
-    const userLitRows = await db.all('SELECT bead_position FROM rosary_beads WHERE user_id = ?', userId) as { bead_position: number }[];
-    const litSet = new Set(userLitRows.map(r => r.bead_position));
-
-    let startSmall = 11;
-    let endSmall = 20;
-    let largePos = 53;
-
-    if (!litSet.has(11)) {
-      // Chục 2: Xanh lá (11..20)
-      startSmall = 11;
-      endSmall = 20;
-      largePos = 53;
-    } else if (!litSet.has(21)) {
-      // Chục 3: Xanh dương (21..30)
-      startSmall = 21;
-      endSmall = 30;
-      largePos = 54;
-    } else if (!litSet.has(31)) {
-      // Chục 4: Đỏ (31..40)
-      startSmall = 31;
-      endSmall = 40;
-      largePos = 55;
-    } else if (!litSet.has(41)) {
-      // Chục 5: Trắng (41..50)
-      startSmall = 41;
-      endSmall = 50;
-      largePos = 55;
-    } else {
-      // Nếu cả 5 chục đã sáng trong vòng này, xoay vòng chục 2 tiếp theo
-      startSmall = 11;
-      endSmall = 20;
-      largePos = 53;
-    }
-
-    // Thắp sáng hạt to của chục
-    try {
-      await db.run(`
-        INSERT INTO rosary_beads (user_id, bead_position, bead_type, task_completion_id)
-        VALUES (?, ?, 'large', ?)
-        ON CONFLICT(user_id, bead_position) DO UPDATE SET
-          lit_at = datetime('now'),
-          task_completion_id = excluded.task_completion_id
-      `, userId, largePos, completionId);
-      newBeadPositions.push(largePos);
-    } catch {}
-
-    // Thắp sáng 10 hạt nhỏ của chục
-    for (let pos = startSmall; pos <= endSmall; pos++) {
-      try {
-        await db.run(`
-          INSERT INTO rosary_beads (user_id, bead_position, bead_type, task_completion_id)
-          VALUES (?, ?, 'small', ?)
-          ON CONFLICT(user_id, bead_position) DO UPDATE SET
-            lit_at = datetime('now'),
-            task_completion_id = excluded.task_completion_id
-        `, userId, pos, completionId);
-        newBeadPositions.push(pos);
-      } catch {}
-    }
-
-  } else if (taskTitle.startsWith('9.')) {
-    // Bước 9: Mề Đay Đức Mẹ (Kinh Lạy Nữ Vương, Kinh Trông Cậy và Lời Nguyện Tắt)
+  } else if (taskTitle.startsWith('5.') || task.bead_type === 'medallion') {
+    // Bước 5: Mề Đay Đức Mẹ (Kinh Lạy Nữ Vương & Kinh Trông Cậy)
     try {
       await db.run(`
         INSERT INTO rosary_beads (user_id, bead_position, bead_type, task_completion_id)
@@ -312,8 +216,8 @@ export async function POST(req: NextRequest) {
       newBeadPositions.push(57);
     } catch {}
 
-  } else if (taskTitle.startsWith('10.')) {
-    // Bước 10: Làm Dấu Thánh Giá & Hôn Thánh Giá hoàn tất toàn chuỗi
+  } else if (taskTitle.startsWith('6.') || (taskTitle.includes('kết thúc') && task.bead_type === 'cross')) {
+    // Bước 6: Làm Dấu Thánh Giá & Hôn Thánh Giá kết thúc
     try {
       await db.run(`
         INSERT INTO rosary_beads (user_id, bead_position, bead_type, task_completion_id)
@@ -326,7 +230,7 @@ export async function POST(req: NextRequest) {
     } catch {}
 
   } else {
-    // Nhiệm vụ tự do (Đọc thêm 1 Kinh Kính Mừng hoặc 1 Kinh Lạy Cha)
+    // ── Vòng chuỗi hình tròn (1..50 Kinh Kính Mừng & 1..5 Kinh Lạy Cha) ──
     if (beadType === 'small') {
       const prevSmall = totalSmall - beadsToAdd;
       for (let s = prevSmall + 1; s <= totalSmall; s++) {
@@ -344,7 +248,7 @@ export async function POST(req: NextRequest) {
       }
     } else {
       const prevLarge = totalLarge - beadsToAdd;
-      const largePositions = [51, 52, 53, 54, 55, 56];
+      const largePositions = [52, 53, 54, 55];
       for (let l = prevLarge + 1; l <= totalLarge; l++) {
         const idx = (l - 1) % largePositions.length;
         const pos = largePositions[idx];

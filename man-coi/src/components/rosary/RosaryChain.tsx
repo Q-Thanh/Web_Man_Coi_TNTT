@@ -1021,20 +1021,16 @@ export default function RosaryChain({
             );
           })()}
 
-          {/* ─── 5. NUMBERED STEP CALLOUT BADGES (CÁC BƯỚC 1 ĐẾN 10 NHƯ ẢNH HƯỚNG DẪN) ─── */}
+          {/* ─── 5. NUMBERED STEP CALLOUT BADGES (6 BƯỚC KHỞI ĐẦU & KẾT THÚC TRÊN CỘT DỌC) ─── */}
           {showStepNumbers && (
             <g className="rosary-step-callouts">
               {[
-                { step: '1', title: '1. Làm Dấu & Kinh Tin Kính', x: geo.crossX + 34, y: geo.crossY + 24, targetX: geo.crossX + 16, targetY: geo.crossY + 24, bg: '#78350F' },
-                { step: '2', title: '2. Đọc Kinh Lạy Cha', x: geo.cx + 38, y: geo.medallionY + 128, targetX: geo.cx + 14, targetY: geo.medallionY + 128, bg: '#2563EB' },
-                { step: '3', title: '3. Ba Hạt Nhỏ (Kính Mừng)', x: geo.cx + 38, y: geo.medallionY + 70, targetX: geo.cx + 12, targetY: geo.medallionY + 70, bg: '#DC2626' },
+                { step: '1', title: '1. Làm Dấu Thánh Giá và đọc Kinh Tin Kính', x: geo.crossX + 34, y: geo.crossY + 24, targetX: geo.crossX + 16, targetY: geo.crossY + 24, bg: '#78350F' },
+                { step: '2', title: '2. Đọc Kinh Lạy Cha (Hạt lớn xanh dương)', x: geo.cx + 38, y: geo.medallionY + 128, targetX: geo.cx + 14, targetY: geo.medallionY + 128, bg: '#2563EB' },
+                { step: '3', title: '3. Ba Hạt Nhỏ: Mỗi hạt đọc một Kinh Kính Mừng', x: geo.cx + 38, y: geo.medallionY + 70, targetX: geo.cx + 12, targetY: geo.medallionY + 70, bg: '#16A34A' },
                 { step: '4', title: '4. Đọc Kinh Sáng Danh', x: geo.cx + 38, y: geo.medallionY + 23, targetX: geo.cx, targetY: geo.medallionY + 23, bg: '#D97706' },
-                { step: '5', title: '5. Ngắm Mầu Nhiệm 1 & Lạy Cha', x: geo.cx - 46, y: geo.medallionY + 8, targetX: geo.cx - 18, targetY: geo.medallionY, bg: '#D97706' },
-                { step: '6', title: '6. Mười Hạt Nhỏ (Chục 1 - Vàng)', x: geo.cx - geo.rx * 0.95 - 18, y: geo.ovalCY + geo.ry * 0.58, targetX: geo.cx - geo.rx * 0.95 + 6, targetY: geo.ovalCY + geo.ry * 0.58, bg: '#CA8A04' },
-                { step: '7', title: '7. Kinh Sáng Danh & Fatima', x: geo.cx - geo.rx * 1.05 - 18, y: geo.ovalCY + geo.ry * 0.08, targetX: geo.cx - geo.rx * 1.05 + 6, targetY: geo.ovalCY + geo.ry * 0.08, bg: '#B45309' },
-                { step: '8', title: '8. Ngắm Mầu Nhiệm 2 (Chục 2-5)', x: geo.cx - geo.rx * 0.85 - 18, y: geo.ovalCY - geo.ry * 0.65, targetX: geo.cx - geo.rx * 0.85 + 6, targetY: geo.ovalCY - geo.ry * 0.65, bg: '#16A34A' },
-                { step: '9', title: '9. Kinh Lạy Nữ Vương tại Mề Đay', x: geo.cx - 46, y: geo.medallionY - 14, targetX: geo.cx - 16, targetY: geo.medallionY, bg: '#B45309' },
-                { step: '10', title: '10. Hôn Thánh Giá hoàn tất', x: geo.crossX - 34, y: geo.crossY + 24, targetX: geo.crossX - 16, targetY: geo.crossY + 24, bg: '#78350F' },
+                { step: '5', title: '5. Đọc Kinh Lạy Nữ Vương & Kinh Trông Cậy', x: geo.cx - 36, y: geo.medallionY, targetX: geo.cx - 16, targetY: geo.medallionY, bg: '#D97706' },
+                { step: '6', title: '6. Làm Dấu Thánh Giá và hôn Thánh Giá kết thúc', x: geo.crossX - 34, y: geo.crossY + 24, targetX: geo.crossX - 16, targetY: geo.crossY + 24, bg: '#78350F' },
               ].map((badge) => (
                 <g key={badge.step} style={{ cursor: 'pointer' }}>
                   {/* Dashed pointer line */}

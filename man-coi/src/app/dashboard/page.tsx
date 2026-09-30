@@ -168,8 +168,9 @@ export default function DashboardPage() {
   if (!dashData) return null;
 
   const { user, beads, litCount, smallBeads, largeBeads, streak, todayBeads } = dashData;
-  const guideTasks = tasks.filter(t => /^\d+\./.test(t.title));
-  const freeTasks = tasks.filter(t => !/^\d+\./.test(t.title));
+  const stemTasks = tasks.filter(t => /^\d+\./.test(t.title));
+  const kinhMungTasks = tasks.filter(t => !/^\d+\./.test(t.title) && (t.bead_type === 'small' || t.title.includes('Kính Mừng')));
+  const layChaTasks = tasks.filter(t => !/^\d+\./.test(t.title) && (t.bead_type === 'large' || t.title.includes('Lạy Cha')));
 
   const rosaryBeads = beads.map(b => ({
     ...b,
@@ -315,46 +316,70 @@ export default function DashboardPage() {
 
         {/* ─── TASKS ─── */}
         <section className={styles.tasksSection}>
-          {/* Hướng dẫn 10 bước lần hạt theo ảnh */}
-          <div style={{
-            background: 'linear-gradient(135deg, #EFF6FF 0%, #F0FDF4 100%)',
-            border: '1.5px solid #BFDBFE',
-            borderRadius: 20,
-            padding: '20px 24px',
-            marginBottom: '28px',
-            boxShadow: '0 4px 16px rgba(37, 99, 235, 0.06)'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-              <span style={{ fontSize: '24px' }}>📿</span>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#1E3A8A', margin: 0 }}>
-                10 Bước Lần Hạt Mân Côi (Theo Thứ Tự Hướng Dẫn)
-              </h2>
-            </div>
-            <p style={{ fontSize: '13.5px', color: '#475569', margin: 0, lineHeight: 1.5 }}>
-              Lần lượt bấm <strong>Hoàn thành</strong> từng nhiệm vụ bên dưới để thắp sáng các hạt trên chuỗi theo đúng thứ tự đánh số <strong>(1) đến (10)</strong> như trong hình hướng dẫn!
-            </p>
-          </div>
-
-          <div className={styles.taskList}>
-            {guideTasks.map(task => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                isCompleting={completingTaskId === task.id}
-                onComplete={() => handleCompleteTask(task)}
-              />
-            ))}
-          </div>
-
-          {/* Cầu nguyện thêm tự do */}
-          {freeTasks.length > 0 && (
+          {/* Section 1: Khởi đầu & Kết thúc chuỗi (Các hạt dọc) */}
+          {stemTasks.length > 0 && (
             <>
-              <h2 className={styles.sectionTitle} style={{ marginTop: '36px' }}>
-                🕊️ Cầu Nguyện Thêm <span style={{ fontSize: '0.9rem', color: '#6B7280' }}>(Đọc kinh tự do)</span>
+              <div style={{
+                background: 'linear-gradient(135deg, #EFF6FF 0%, #F0FDF4 100%)',
+                border: '1.5px solid #BFDBFE',
+                borderRadius: 20,
+                padding: '20px 24px',
+                marginBottom: '20px',
+                boxShadow: '0 4px 16px rgba(37, 99, 235, 0.06)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+                  <span style={{ fontSize: '24px' }}>📿</span>
+                  <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#1E3A8A', margin: 0 }}>
+                    Khởi Đầu & Kết Thúc Chuỗi Mân Côi (Các Hạt Dọc)
+                  </h2>
+                </div>
+                <p style={{ fontSize: '13.5px', color: '#475569', margin: 0, lineHeight: 1.5 }}>
+                  Lần lượt hoàn thành từng bước <strong>(1) đến (6)</strong> để thắp sáng các hạt trên cột dọc (Cây Thánh Giá, Hạt lớn xanh dương, 3 hạt nhỏ Tin-Cậy-Mến và Mề Đay Đức Mẹ)!
+                </p>
+              </div>
+
+              <div className={styles.taskList} style={{ marginBottom: '36px' }}>
+                {stemTasks.map(task => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    isCompleting={completingTaskId === task.id}
+                    onComplete={() => handleCompleteTask(task)}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* Section 2: Kinh Kính Mừng (Vòng chuỗi 5 chục kinh) */}
+          {kinhMungTasks.length > 0 && (
+            <>
+              <h2 className={styles.sectionTitle} style={{ marginTop: '16px' }}>
+                🌹 Kinh Kính Mừng <span style={{ fontSize: '0.9rem', color: '#6B7280' }}>(Vòng chuỗi 50 hạt - 5 chục kinh)</span>
               </h2>
-              <p className={styles.sectionSub}>Dâng thêm những đoá hoa hồng kinh nguyện lên Mẹ bất kỳ lúc nào</p>
+              <p className={styles.sectionSub}>Chọn số lượng kinh đã đọc để thắp sáng 50 hạt nhỏ theo 5 sắc màu mầu nhiệm (1 kinh = 1 điểm)</p>
+              <div className={styles.taskList} style={{ marginBottom: '36px' }}>
+                {kinhMungTasks.map(task => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    isCompleting={completingTaskId === task.id}
+                    onComplete={() => handleCompleteTask(task)}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* Section 3: Kinh Lạy Cha (Hạt lớn giữa các chục) */}
+          {layChaTasks.length > 0 && (
+            <>
+              <h2 className={styles.sectionTitle}>
+                🙏 Kinh Lạy Cha <span style={{ fontSize: '0.9rem', color: '#6B7280' }}>(Hạt lớn giữa các chục kinh)</span>
+              </h2>
+              <p className={styles.sectionSub}>Thắp sáng các hạt vàng lớn phân cách giữa các mầu nhiệm</p>
               <div className={styles.taskList}>
-                {freeTasks.map(task => (
+                {layChaTasks.map(task => (
                   <TaskCard
                     key={task.id}
                     task={task}
@@ -390,15 +415,12 @@ function TaskCard({
   const isMedallion = task.bead_type === 'medallion';
 
   // Choose accent color for step badge
-  const stepColor = stepNumber === '1' || stepNumber === '10' ? '#78350F'
+  const stepColor = stepNumber === '1' ? '#78350F'
     : stepNumber === '2' ? '#2563EB'
-    : stepNumber === '3' ? '#DC2626'
+    : stepNumber === '3' ? '#16A34A'
     : stepNumber === '4' ? '#D97706'
     : stepNumber === '5' ? '#D97706'
-    : stepNumber === '6' ? '#CA8A04'
-    : stepNumber === '7' ? '#B45309'
-    : stepNumber === '8' ? '#16A34A'
-    : stepNumber === '9' ? '#B45309'
+    : stepNumber === '6' ? '#78350F'
     : '#2563EB';
 
   const bgColor = isCross ? '#FFFBEB' : isMedallion ? '#FEF3C7' : isLarge ? '#EFF6FF' : '#FFF1F2';

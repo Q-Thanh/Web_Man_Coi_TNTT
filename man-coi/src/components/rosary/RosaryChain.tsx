@@ -239,12 +239,13 @@ export default function RosaryChain({
   }, [beads]);
 
   const litSmallCount = useMemo(() => {
-    return beads.filter(b => b.type === 'small' && b.isLit).length;
-  }, [beads]);
+    return mysteryInfo.beadsInRound;
+  }, [mysteryInfo.beadsInRound]);
 
   const litLargeCount = useMemo(() => {
-    return beads.filter(b => b.type === 'large' && b.isLit).length;
-  }, [beads]);
+    const prevRoundLarge = (mysteryInfo.roundNumber - 1) * 5;
+    return Math.max(0, Math.min(5, currentTotalLarge - prevRoundLarge));
+  }, [mysteryInfo.roundNumber, currentTotalLarge]);
 
   const newSet = useMemo(() => {
     const s = new Set<number>();
@@ -533,7 +534,9 @@ export default function RosaryChain({
           {/* Loop Beads (50 hạt nhỏ xanh dương + 4 hạt lớn vàng) */}
           {geo.loopBeads.map((bead) => {
             const isLarge = bead.type === 'large';
-            const isLit = litMap.has(bead.position);
+            const isLit = isLarge
+              ? (bead.decadeIndex ? bead.decadeIndex <= litLargeCount : false)
+              : (bead.position <= litSmallCount);
             const isNew = newSet.has(bead.position);
             const radius = isLarge ? 12 : 7.5;
             const isSelected = selectedBead?.id === bead.id;

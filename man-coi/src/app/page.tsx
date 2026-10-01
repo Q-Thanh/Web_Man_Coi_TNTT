@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import AppLogo from '@/components/ui/AppLogo';
 import styles from './page.module.css';
 
 export default function LandingPage() {
@@ -20,10 +21,7 @@ export default function LandingPage() {
     <div className={styles.page}>
       {/* Navigation */}
       <nav className={styles.nav}>
-        <div className={styles.navLogo}>
-          <span>📿</span>
-          <strong>Chuỗi Mân Côi</strong>
-        </div>
+        <AppLogo size="sm" title="Chuỗi Mân Côi" subtitle="Thiếu Nhi Thánh Thể" />
         <Link href="/login" className={styles.navBtn}>Đăng nhập</Link>
       </nav>
 

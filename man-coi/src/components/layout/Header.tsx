@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { getAvatarInitials } from '@/lib/utils';
+import AppLogo from '@/components/ui/AppLogo';
 import styles from './Header.module.css';
 
 export default function Header() {
@@ -38,12 +39,8 @@ export default function Header() {
     <header className={styles.header} ref={headerRef}>
       <div className={styles.headerInner}>
         {/* Logo */}
-        <Link href="/dashboard" className={styles.logo}>
-          <span className={styles.logoIcon}>📿</span>
-          <div className={styles.logoText}>
-            <span className={styles.logoTitle}>Mân Côi</span>
-            <span className={styles.logoSub}>Hành trình yêu thương</span>
-          </div>
+        <Link href="/dashboard" style={{ textDecoration: 'none' }}>
+          <AppLogo size="md" title="Mân Côi" subtitle="Hành trình yêu thương" />
         </Link>
 
         {/* Nav links (desktop) */}

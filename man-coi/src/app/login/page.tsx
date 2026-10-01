@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import AppLogo from '@/components/ui/AppLogo';
 import styles from './login.module.css';
 
 export default function LoginPage() {
@@ -63,10 +64,8 @@ export default function LoginPage() {
 
       <div className={styles.loginCard}>
         {/* Logo */}
-        <div className={styles.logoArea}>
-          <div className={styles.logoIcon}>📿</div>
-          <h1 className={styles.logoTitle}>Chuỗi Mân Côi</h1>
-          <p className={styles.logoSub}>Hành trình yêu thương</p>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 28 }}>
+          <AppLogo size="xl" title="Chuỗi Mân Côi" subtitle="Hành trình yêu thương" />
         </div>
 
         <h2 className={styles.formTitle}>Đăng nhập</h2>

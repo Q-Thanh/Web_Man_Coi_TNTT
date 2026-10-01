@@ -8,10 +8,20 @@ export const metadata: Metadata = {
     'Website minigame khuyến khích thiếu nhi đọc kinh Mân Côi. Mỗi hạt – một bước yêu thương. Cùng nhau xây dựng thói quen cầu nguyện, việc tốt và tinh thần đoàn kết.',
   keywords: ['Mân Côi', 'thiếu nhi', 'Công giáo', 'giáo xứ', 'cầu nguyện'],
   authors: [{ name: 'Giáo xứ Tân Hương' }],
+  icons: {
+    icon: [
+      { url: '/logo.png', sizes: '32x32', type: 'image/png' },
+      { url: '/logo.png', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/logo.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
   openGraph: {
     title: '📿 Chuỗi Mân Côi – Mỗi hạt, một bước yêu thương',
     description: 'Minigame hành trình Mân Côi dành cho thiếu nhi Công giáo',
     type: 'website',
+    images: [{ url: '/logo.png' }],
   },
 };
 
